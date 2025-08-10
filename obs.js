@@ -184,13 +184,21 @@
     // Get battery level and charging status.
     const { level, charging } = battery;
 
-    // The API doesn’t report Low Power Mode or similar, so let’s just assume
-    // that a device with less than 20% charge is considered ‘low’.
+    // The API doesn’t report Low Power Mode or similar. Treat ≤5% as
+    // ‘critical’ and ≤20% as ‘low’.
+    const critical = Number.isFinite(level) ? level <= 0.05 : null;
+    window.obs.batteryCritical = critical;
+
     const low = Number.isFinite(level) ? level <= 0.2 : null;
     window.obs.batteryLow = low;
 
-    // Add low-battery class to `html` element.
-    html.classList.toggle('has-battery-low', !!low);
+    // Add most urgent battery class.
+    ['critical','low'].forEach(t => html.classList.remove(`has-battery-${t}`));
+    if (critical) {
+      html.classList.add('has-battery-critical');
+    } else if (low) {
+      html.classList.add('has-battery-low');
+    }
 
     // Add a class to the `html` element if the device is currently charging
     const isCharging = !!charging;
