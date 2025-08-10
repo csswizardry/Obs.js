@@ -227,3 +227,4 @@
       .catch(() => { /* no‑op */ });
   }
 })();
+//# sourceURL=obs.js
