@@ -16,6 +16,9 @@
   // Store state in a global `obs` object for reuse later in your application.
   window.obs = window.obs || {};
 
+  const obsConfig = (window.obs && window.obs.config) || {};
+  const observeChanges = obsConfig.observeChanges !== false;
+
   // Helper function:
   // Bucket RTT into the nearest upper 25ms. E.g. an RTT of 108ms would be put
   // into the 125ms bucket. Think of 125ms as being 100–125ms.
@@ -99,7 +102,7 @@
   refreshConnectionStatus();
 
   // Listen out for network condition changes and rerun the function.
-  if (connection && typeof connection.addEventListener === 'function') {
+  if (observeChanges && connection?.addEventListener) {
     connection.addEventListener('change', refreshConnectionStatus);
   }
 
@@ -137,13 +140,9 @@
         refreshBatteryStatus(battery);
 
         // Listen out for battery changes and rerun the function.
-        if (typeof battery.addEventListener === 'function') {
-          battery.addEventListener('levelchange', () =>
-            refreshBatteryStatus(battery)
-          );
-          battery.addEventListener('chargingchange', () =>
-            refreshBatteryStatus(battery)
-          );
+        if (observeChanges && typeof battery.addEventListener === 'function') {
+          battery.addEventListener('levelchange', () => refreshBatteryStatus(battery));
+          battery.addEventListener('chargingchange', () => refreshBatteryStatus(battery));
         }
       })
 
