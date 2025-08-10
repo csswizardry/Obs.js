@@ -16,6 +16,29 @@
   // Store state in a global `obs` object for reuse later in your application.
   window.obs = window.obs || {};
 
+  // Optional logging driven by configuration.
+  // Set before loading obj.js, e.g.:
+  //   window.obs = { config: { log: true } }
+  const obsConfig = (window.obs && window.obs.config) || {};
+  const shouldLog = !!obsConfig.log;
+
+  // Simple logger: prints current values on `window.obs` (except `config`).
+  const logObs = () => {
+    if (!shouldLog) return;
+    try {
+      for (const [key, value] of Object.entries(window.obs)) {
+        if (key === 'config') continue;
+        console.log('[obs]', key, value);
+      }
+    } catch (e) {
+      for (const key in window.obs) {
+        if (Object.prototype.hasOwnProperty.call(window.obs, key) && key !== 'config') {
+          console.log('[obs]', key, window.obs[key]);
+        }
+      }
+    }
+  };
+
   // Helper function:
   // Bucket RTT into the nearest upper 25ms. E.g. an RTT of 108ms would be put
   // into the 125ms bucket. Think of 125ms as being 100–125ms.
@@ -93,6 +116,7 @@
     if ('downlinkMax' in connection) {
       window.obs.downlinkMax = connection.downlinkMax;
     }
+
   };
 
   // Run the connection function immediately.
@@ -129,6 +153,10 @@
     const isCharging = !!charging;
     window.obs.batteryCharging = isCharging;
     html.classList.toggle('has-battery-charging', isCharging);
+
+    // Once Battery has returned, log everything we have.
+    logObs();
+
   };
 
   // Battery metrics (best‑effort and privacy‑respecting).
@@ -152,4 +180,5 @@
       // Fail silently.
       .catch(() => { /* no‑op */ });
   }
+
 })();
