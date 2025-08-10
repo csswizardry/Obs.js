@@ -15,7 +15,7 @@
   const obsSrc = document.currentScript;
 
   if (!obsSrc || obsSrc.src || (obsSrc.type && obsSrc.type.toLowerCase() === 'module')) {
-    if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) === false) {
+    if (/^(localhost|127\.0\.0\.1|::1)$/.test(location.hostname) === false) {
       console.warn(
         '[obs] Skipping: must be an inline, classic <script> in <head>.',
         obsSrc ? (obsSrc.src ? 'src=' + obsSrc.src : 'type=' + obsSrc.type) : 'type=module'
