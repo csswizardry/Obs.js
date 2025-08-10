@@ -1,7 +1,7 @@
 ;(() => {
 
   /**
-   * obs.js uses the Navigator and Battery APIs to get realtime network and
+   * Obs.js uses the Navigator and Battery APIs to get realtime network and
    * battery status of your user’s device. You can use this information to
    * adapt to their context, or send the data off to SpeedCurve with
    * `obs-speedcurve.js`.
@@ -30,7 +30,7 @@
   // Grab the `connection` property from `navigator`.
   const { connection } = navigator;
 
-  // Store state in a global `obs` object for reuse later in your application.
+  // Store state in a global `window.obs` object for reuse later in your application.
   window.obs = window.obs || {};
 
   const obsConfig = (window.obs && window.obs.config) || {};
@@ -61,12 +61,12 @@
   // Combine network capability (RTT + bandwidth) and user/device preferences
   // (Save-Data, low battery) into a delivery stance.
   //
-  // Exposes:
-  //   - obs.connectionCapability: 'strong'|'moderate'|'weak'
-  //   - obs.conservationPreference: 'conserve'|'neutral'
-  //   - obs.deliveryMode: 'rich'|'cautious'|'lite'
-  //   - obs.canShowRichMedia: boolean
-  //   - obs.shouldAvoidRichMedia: boolean
+  // Exposes on `window.obs`:
+  //   - connectionCapability: 'strong'|'moderate'|'weak'
+  //   - conservationPreference: 'conserve'|'neutral'
+  //   - deliveryMode: 'rich'|'cautious'|'lite'
+  //   - canShowRichMedia: boolean
+  //   - shouldAvoidRichMedia: boolean
   const recomputeDelivery = () => {
     const o = window.obs || {};
 
