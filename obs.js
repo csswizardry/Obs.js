@@ -7,6 +7,23 @@
    * `obs-speedcurve.js`.
    */
 
+  // Immediately disallow the inclusion of Obs.js as an external script—or as an
+  // inline `type=module`—except on localhost. This file cannot be run
+  // asynchronously, which means it should not be placed externally either: that
+  // would kill performance and that’s the exact opposite of what we’re trying
+  // to achieve.
+  const obsSrc = document.currentScript;
+
+  if (!obsSrc || obsSrc.src || (obsSrc.type && obsSrc.type.toLowerCase() === 'module')) {
+    if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) === false) {
+      console.warn(
+        '[obs] Skipping: must be an inline, classic <script> in <head>.',
+        obsSrc ? (obsSrc.src ? 'src=' + obsSrc.src : 'type=' + obsSrc.type) : 'type=module'
+      );
+      return;
+    }
+  }
+
   // Attach classes to the document.
   const html = document.documentElement;
 
