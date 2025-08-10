@@ -2,7 +2,7 @@
 
   /**
    * obs.js uses the Navigator and Battery APIs to get realtime network and
-   * battery status of your users’ device. You can use this information to
+   * battery status of your user’s device. You can use this information to
    * adapt to their context, or send the data off to SpeedCurve with
    * `obs-speedcurve.js`.
    */
@@ -100,9 +100,7 @@
 
   // Listen out for network condition changes and rerun the function.
   if (connection && typeof connection.addEventListener === 'function') {
-    connection.addEventListener('change', refreshConnectionStatus, {
-      passive: true
-    });
+    connection.addEventListener('change', refreshConnectionStatus);
   }
 
 
