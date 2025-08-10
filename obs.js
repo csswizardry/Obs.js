@@ -168,7 +168,7 @@
   refreshConnectionStatus();
 
   // Listen out for network condition changes and rerun the function.
-  if (observeChanges && connection?.addEventListener) {
+  if (observeChanges && connection && typeof connection.addEventListener === 'function') {
     connection.addEventListener('change', refreshConnectionStatus);
   }
 
