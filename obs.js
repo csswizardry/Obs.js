@@ -41,6 +41,63 @@
   const bucketDownlink = d =>
     Number.isFinite(d) ? Math.ceil(d) : null;
 
+  // Combine network capability (RTT + bandwidth) and user/device preferences
+  // (Save-Data, low battery) into a delivery stance.
+  //
+  // Exposes:
+  //   - obs.connectionCapability: 'strong'|'moderate'|'weak'
+  //   - obs.conservationPreference: 'conserve'|'neutral'
+  //   - obs.deliveryMode: 'rich'|'cautious'|'lite'
+  //   - obs.canShowRichMedia: boolean
+  //   - obs.shouldAvoidRichMedia: boolean
+  const recomputeDelivery = () => {
+    const o = window.obs || {};
+
+    // Capability from network only (RTT + bandwidth)
+    const bw = typeof o.downlinkBucket === 'number' ? o.downlinkBucket : null;
+    const lowRTT  = o.rttCategory === 'low';
+    const highRTT = o.rttCategory === 'high';
+    const highBW  = bw != null && bw >= 8; // 1Mbps buckets
+    const lowBW   = bw != null && bw <= 5;
+
+    o.connectionCapability = (lowRTT && highBW)
+      ? 'strong'
+      : (highRTT || lowBW)
+      ? 'weak'
+      : 'moderate';
+
+    // Preference/context (user choice + device state)
+    const conserve = (o.dataSaver === true) || (o.batteryLow === true);
+    o.conservationPreference = conserve ? 'conserve' : 'neutral';
+
+    // Combined delivery stance we key behaviour from
+    const rich  = !conserve && o.connectionCapability === 'strong';
+    const avoid =  conserve || o.connectionCapability === 'weak';
+    o.deliveryMode = rich ? 'rich' : (avoid ? 'lite' : 'cautious');
+
+    // Convenience booleans
+    o.canShowRichMedia     = (o.deliveryMode === 'rich');
+    o.shouldAvoidRichMedia = (o.deliveryMode === 'lite');
+
+    // Add classes to the `html` element for each of our delivery stances.
+    ['strong','moderate','weak'].forEach(t => {
+      html.classList.remove(`has-connection-capability-${t}`);
+    });
+    html.classList.add(`has-connection-capability-${o.connectionCapability}`);
+
+    // Preference classes (new) + remove legacy
+    ['conserve','neutral'].forEach(t => {
+      html.classList.remove(`has-conservation-preference-${t}`);
+    });
+    html.classList.add(`has-conservation-preference-${o.conservationPreference}`);
+
+    // Delivery classes (new) + remove legacy
+    ['rich','cautious','lite'].forEach(t => {
+      html.classList.remove(`has-delivery-mode-${t}`);
+    });
+    html.classList.add(`has-delivery-mode-${o.deliveryMode}`);
+  };
+
   // Run this function on demand to grab fresh data from the Network Information
   // API.
   const refreshConnectionStatus = () => {
@@ -78,17 +135,6 @@
       const isHigh = downlinkBucket >= 8;
       html.classList.toggle('has-bandwidth-low', isLow);
       html.classList.toggle('has-bandwidth-high', isHigh);
-
-      // Somewhat opinionated decision to mark low latency and high downlink
-      // connections as strong, and high latency and low downlink connections as
-      // weak.
-      const latencyIsLow  = window.obs.rttCategory === 'low';
-      const latencyIsHigh = window.obs.rttCategory === 'high';
-      const bandwidthIsLow  = isLow;
-      const bandwidthIsHigh = isHigh;
-      html.classList.toggle('has-connection-strong', latencyIsLow && bandwidthIsHigh);
-      html.classList.toggle('has-connection-weak',   latencyIsHigh && bandwidthIsLow);
-
     }
 
     // We don’t do anything with it, but get maximum estimated `downlink` while
@@ -96,6 +142,9 @@
     if ('downlinkMax' in connection) {
       window.obs.downlinkMax = connection.downlinkMax;
     }
+
+    // Update delivery stance combining capability and preferences.
+    recomputeDelivery();
   };
 
   // Run the connection function immediately.
@@ -130,6 +179,9 @@
     const isCharging = !!charging;
     window.obs.batteryCharging = isCharging;
     html.classList.toggle('has-battery-charging', isCharging);
+
+    // Update delivery stance combining capability and preferences.
+    recomputeDelivery();
   };
 
   // Battery metrics (best‑effort and privacy‑respecting).
