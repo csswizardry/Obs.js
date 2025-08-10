@@ -1,4 +1,4 @@
-(() => {
+;(() => {
 
   /**
    * obs.js uses the Navigator and Battery APIs to get realtime network and
