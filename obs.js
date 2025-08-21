@@ -228,14 +228,12 @@
     const low = Number.isFinite(level) ? level <= 0.2 : null;
     window.obs.batteryLow = low;
 
-    // Add most urgent battery class, removing any classes left over.
-    // E.g. `<html class="has-battery-critical">`
+    // Add battery classes (subset model): at ≤5% we want BOTH low and critical.
+    // First remove leftovers, then add any that apply.
+    // E.g. `<html class="has-battery-low has-battery-critical">`
     ['critical','low'].forEach(t => html.classList.remove(`has-battery-${t}`));
-    if (critical) {
-      html.classList.add('has-battery-critical');
-    } else if (low) {
-      html.classList.add('has-battery-low');
-    }
+    if (low)      html.classList.add('has-battery-low');
+    if (critical) html.classList.add('has-battery-critical');
 
     // Add a class to the `<html>` element if the device is currently charging.
     // E.g. `<html class="has-battery-charging">`
@@ -269,4 +267,3 @@
       .catch(() => { /* no‑op */ });
   }
 })();
-//# sourceURL=obs.js
