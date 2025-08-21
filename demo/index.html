@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang=en-gb>
+  <meta charset=utf-8>
+  <meta name=viewport content="width=device-width, minimum-scale=1.0">
+
+
+
+
+
+  <!-- Optional config: observe live changes in this demo -->
+  <script>window.obs = { config: { observeChanges: true } };</script>
+
+  <script>
+    /*! Obs.js | (c) Harry Roberts, csswizardry.com | MIT */
+    ;(()=>{const e=document.currentScript;if((!e||e.src||e.type&&"module"===e.type.toLowerCase())&&!1===/^(localhost|127\.0\.0\.1|::1)$/.test(location.hostname))return void console.warn("[Obs.js] Skipping: must be an inline, classic <script> in <head>.",e?e.src?"src="+e.src:"type="+e.type:"type=module");const t=document.documentElement,{connection:n}=navigator;window.obs=window.obs||{};const i=!0===(window.obs&&window.obs.config||{}).observeChanges,o=()=>{const e=window.obs||{},n="number"==typeof e.downlinkBucket?e.downlinkBucket:null;e.connectionCapability="low"===e.rttCategory&&null!=n&&n>=8?"strong":"high"===e.rttCategory||null!=n&&n<=5?"weak":"moderate";const i=!0===e.dataSaver||!0===e.batteryLow;e.conservationPreference=i?"conserve":"neutral",e.deliveryMode=i||"strong"!==e.connectionCapability?i||"weak"===e.connectionCapability?"lite":"cautious":"rich",e.canShowRichMedia="rich"===e.deliveryMode,e.shouldAvoidRichMedia="lite"===e.deliveryMode,["strong","moderate","weak"].forEach(e=>{t.classList.remove(`has-connection-capability-${e}`)}),t.classList.add(`has-connection-capability-${e.connectionCapability}`),["conserve","neutral"].forEach(e=>{t.classList.remove(`has-conservation-preference-${e}`)}),t.classList.add(`has-conservation-preference-${e.conservationPreference}`),["rich","cautious","lite"].forEach(e=>{t.classList.remove(`has-delivery-mode-${e}`)}),t.classList.add(`has-delivery-mode-${e.deliveryMode}`)},a=()=>{if(!n)return;const{saveData:e,rtt:i,downlink:a}=n;window.obs.dataSaver=!!e,t.classList.toggle("has-data-saver",!!e);const s=(e=>Number.isFinite(e)?25*Math.ceil(e/25):null)(i);null!=s&&(window.obs.rttBucket=s);const c=(e=>Number.isFinite(e)?e<75?"low":e<=275?"medium":"high":null)(i);c&&(window.obs.rttCategory=c,["low","medium","high"].forEach(e=>t.classList.remove(`has-latency-${e}`)),t.classList.add(`has-latency-${c}`));const r=(l=a,Number.isFinite(l)?Math.ceil(l):null);var l;if(null!=r){window.obs.downlinkBucket=r;const e=r>=8;t.classList.toggle("has-bandwidth-low",r<=5),t.classList.toggle("has-bandwidth-high",e)}"downlinkMax"in n&&(window.obs.downlinkMax=n.downlinkMax),o()};a(),i&&n&&"function"==typeof n.addEventListener&&n.addEventListener("change",a);const s=e=>{if(!e)return;const{level:n,charging:i}=e,a=Number.isFinite(n)?n<=.05:null;window.obs.batteryCritical=a;const s=Number.isFinite(n)?n<=.2:null;window.obs.batteryLow=s,["critical","low"].forEach(e=>t.classList.remove(`has-battery-${e}`)),s&&t.classList.add("has-battery-low"),a&&t.classList.add("has-battery-critical");const c=!!i;window.obs.batteryCharging=c,t.classList.toggle("has-battery-charging",c),o()};"getBattery"in navigator&&navigator.getBattery().then(e=>{s(e),i&&"function"==typeof e.addEventListener&&(e.addEventListener("levelchange",()=>s(e)),e.addEventListener("chargingchange",()=>s(e)))}).catch(()=>{})})();
+    //# sourceURL=obs.inline.js
+  </script>
+
+
+
+
+
+  <title>Obs.js demo</title>
+
+
+
+
+
+  <style>
+
+    :root {
+      --fg: #333;
+      --bg: #f9f9f9;
+      --brand: #f43059;
+      --ok: #0a0;
+      --warn: #a60;
+      --bad: #a00;
+    }
+
+    html {
+      color: var(--fg);
+      background-color: var(--bg);
+      font: 1em/1.5 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      font-weight: 400;
+    }
+
+    body {
+      margin: 2rem auto;
+      max-width: 70ch;
+      padding: 0 1rem;
+    }
+
+    h1, h2 {
+      text-wrap: balance;
+      color: var(--brand);
+    }
+
+    code, kbd, samp, output, pre {
+      font-family: "Operator Mono", SFMono-Regular, Inconsolata, Monaco, Consolas, "Andale Mono", "Bitstream Vera Sans Mono", "Courier New", Courier, monospace;
+    }
+
+    a {
+      color: var(--brand);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    a:hover,
+    a:active,
+    a:focus {
+      text-decoration: underline;
+    }
+
+    .c-pill {
+      display: inline-block;
+      border: 1px solid #ccc;
+      padding: .15rem .5rem;
+      border-radius: 999px;
+      margin: .15rem .25rem .15rem 0;
+    }
+
+    .u-good {
+      background: #e9f6ea;
+      border-color: #cfe9d2;
+      color: var(--ok);
+    }
+
+    .u-warn {
+      background: #fff3e0;
+      border-color: #ffe0b2;
+      color: var(--warn);
+    }
+
+    .u-bad {
+      background: #fdecea;
+      border-color: #f5c6cb;
+      color: var(--bad);
+    }
+
+  </style>
+
+
+
+
+
+  <h1>Obs.js demo</h1>
+
+  <p><a href=https://github.com/csswizardry/Obs.js>Obs.js</a> uses the Navigator
+  and Battery APIs to get contextual information about your users’ connection
+  strength and battery status.</p>
+
+  <p>It is built and maintained by <a href=https://csswizardry.com>Harry
+    Roberts</a> under the MIT license.</p>
+
+  <p>This page shows the <code>.has-*</code> classes on
+  <code>&lt;html&gt;</code> and the current <code>window.obs</code> object.
+  Toggle Data Saver, plug/unplug power, or change networks to see updates (where
+  supported).</p>
+
+  <h2><code>html.classList</code></h2>
+
+  <div id=classes aria-live=polite></div>
+
+  <h2><code>window.obs</code></h2>
+
+  <pre id=obs aria-live=polite></pre>
+
+  <script>
+    // Render helpers
+    const byId = id => document.getElementById(id);
+    const classesEl = byId('classes');
+    const obsEl = byId('obs');
+
+    const interesting = (cls) => cls.startsWith('has-');
+
+    // Map classes to traffic-light colours for quick visual scanning.
+    const classify = (name) => {
+      // Red (bad)
+      if (
+        /battery-critical/.test(name) ||
+        /connection-capability-weak/.test(name) ||
+        /delivery-mode-lite/.test(name)
+      ) return 'c-pill u-bad';
+
+      // Amber (warn)
+      if (
+        /battery-low/.test(name) ||
+        /has-data-saver/.test(name) ||
+        /bandwidth-low/.test(name) ||
+        /latency-high/.test(name) ||
+        /conservation-preference-conserve/.test(name) ||
+        /connection-capability-moderate/.test(name) ||
+        /delivery-mode-cautious/.test(name)
+      ) return 'c-pill u-warn';
+
+      // Green (good)
+      if (
+        /connection-capability-strong/.test(name) ||
+        /delivery-mode-rich/.test(name) ||
+        /bandwidth-high/.test(name) ||
+        /latency-low/.test(name)
+      ) return 'c-pill u-good';
+
+      // Neutral
+      return 'c-pill';
+    };
+
+    function renderClasses() {
+      const list = (document.documentElement.className || '')
+        .split(/\s+/)
+        .filter(Boolean)
+        .filter(interesting)
+        .sort((a,b)=>a.localeCompare(b));
+
+      if (!list.length) {
+        classesEl.innerHTML = '<div>No <code>has-*</code> classes present (APIs may be unavailable).</div>';
+        return;
+      }
+
+      classesEl.innerHTML = '';
+      list.forEach(cls => {
+        const span = document.createElement('samp');
+        span.className = classify(cls);
+        span.textContent = '.' + cls;
+        classesEl.appendChild(span);
+      });
+    }
+
+    function renderObs() {
+      try {
+        const snapshot = window.obs ? JSON.parse(JSON.stringify(window.obs)) : {};
+        obsEl.textContent = JSON.stringify(snapshot, null, 2);
+      } catch {
+        obsEl.textContent = String(window.obs);
+      }
+    }
+
+    function renderAll() {
+      renderClasses();
+      renderObs();
+    }
+
+    // Initial paint
+    renderAll();
+
+    // Repaint on likely changes (best-effort)
+    // If observeChanges=true, Obs.js already listens to connection/battery.
+    // Here we just repaint when the microtask queue is free.
+    const queueRender = () => Promise.resolve().then(renderAll);
+
+    // Patch minimal hooks so demo repaints when Obs.js updates:
+    // (No-op if props don’t change—cheap.)
+    ['change', 'levelchange', 'chargingchange'].forEach(evt => {
+      // Connection changes (if available)
+      if (navigator.connection?.addEventListener && evt === 'change') {
+        navigator.connection.addEventListener('change', queueRender, { passive: true });
+      }
+    });
+
+    // Battery changes (if available)
+    if ('getBattery' in navigator) {
+      navigator.getBattery().then(b => {
+        if (typeof b.addEventListener === 'function') {
+          b.addEventListener('levelchange', queueRender);
+          b.addEventListener('chargingchange', queueRender);
+        }
+      }).catch(()=>{ /* no-op */ });
+    }
+
+    // Also repaint after a tick to catch initial async battery read
+    setTimeout(renderAll, 0);
+  </script>
