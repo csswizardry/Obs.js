@@ -165,8 +165,9 @@ Obs.js exposes the following classes under the following conditions:
 | `.has-latency-low`                      | Low RTT                  | `rtt < 75ms`                                                    |
 | `.has-latency-medium`                   | Medium RTT               | `75–275ms`                                                      |
 | `.has-latency-high`                     | High RTT                 | `> 275ms`                                                       |
-| `.has-bandwidth-low`                    | Low estimated bandwidth  | `downlinkBucket ≤ 5` (1 Mbps buckets via `Math.ceil`)           |
-| `.has-bandwidth-high`                   | High estimated bandwidth | `downlinkBucket ≥ 8` (6–7 is a dead zone → no class)            |
+| `.has-bandwidth-low`                    | Low estimated bandwidth  | `downlinkBucket ≤ 5` (1Mbps buckets via `Math.ceil`)            |
+| `.has-bandwidth-medium`                 | Mid estimated bandwidth  | `downlinkBucket 6–7`                                            |
+| `.has-bandwidth-high`                   | High estimated bandwidth | `downlinkBucket ≥ 8`                                            |
 | `.has-connection-capability-strong`     | Transport looks strong   | `latency = low` **and** `bandwidth = high`                      |
 | `.has-connection-capability-moderate`   | Transport middling       | Anything not strong/weak                                        |
 | `.has-connection-capability-weak`       | Transport looks weak     | `latency = high` **or** `bandwidth = low`                       |
@@ -184,6 +185,7 @@ Obs.js also stores the following properties on the `window.obs` object:
 | `rttBucket`              | number (ms)                        | RTT bucketed to **ceil** 25 ms (e.g. 101→125) | `navigator.connection.rtt`                                     | Undefined if Connection API missing                                                        |
 | `rttCategory`            | `'low' \| 'medium' \| 'high'`      | CrUX tri-bin: <75, 75–275, >275               | Derived from `rtt`                                             | Drives latency classes                                                                     |
 | `downlinkBucket`         | number (Mbps)                      | Downlink bucketed to **ceil** 1 Mbps          | `navigator.connection.downlink`                                | Low/High thresholds: `≤5` / `≥8`                                                           |
+| `downlinkCategory`       | `'low' \| 'medium' \| 'high'`      | Bandwidth category                            | Derived from `downlinkBucket` (≤5→low, 6–7→medium, ≥8→high)    | Mirrors `.has-bandwidth-*` classes                                                         |
 | `downlinkMax`            | number (Mbps)                      | Max estimated downlink (if exposed)           | `navigator.connection.downlinkMax`                             | Not used for Stances; informational only                                                   |
 | `connectionCapability`   | `'strong' \| 'moderate' \| 'weak'` | Transport assessment                          | Derived from `rttCategory` and `downlinkBucket`                | Strong = low RTT **and** high BW; Weak = high RTT **or** low BW                            |
 | `conservationPreference` | `'conserve' \| 'neutral'`          | Frugality signal                              | `dataSaver === true` **or** `batteryLow === true` → `conserve` | —                                                                                          |
