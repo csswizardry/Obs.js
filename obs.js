@@ -1,40 +1,9 @@
 ;(() => {
 
   /**
-   *
-   * MIT License
-   *
-   * Copyright (c) Harry Roberts
-   *
-   * Permission is hereby granted, free of charge, to any person obtaining
-   * a copy of this software and associated documentation files (the
-   * ‘Software’), to deal in the Software without restriction, including without
-   * limitation the rights to use, copy, modify, merge, publish, distribute,
-   * sublicense, and/or sell copies of the Software, and to permit persons to
-   * whom the Software is furnished to do so, subject to the following
-   * conditions:
-   *
-   * The above copyright notice and this permission notice shall be included in
-   * all copies or substantial portions of the Software.
-   *
-   * THE SOFTWARE IS PROVIDED ‘AS IS’, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-   * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-   * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-   * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-   * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-   * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-   * DEALINGS IN THE SOFTWARE.
-   */
-
-
-
-
-
-  /**
    * Obs.js uses the Navigator and Battery APIs to get realtime network and
    * battery status of your user’s device. You can use this information to
-   * adapt to their context, or send the data off to SpeedCurve with
-   * `obs-speedcurve.js`.
+   * adapt to their context.
    */
 
 
@@ -43,10 +12,9 @@
 
   /**
    * Immediately disallow the inclusion of Obs.js as an external script, or as
-   * an inline `type=module`, except on localhost. This file cannot be run
-   * asynchronously, which means it should not be placed externally either: that
-   * would kill performance and that’s the exact opposite of what we’re trying
-   * to achieve.
+   * an inline `type=module`, except on localhost. This file should not be run
+   * asynchronously. It should not be placed externally either: that would kill
+   * performance and that’s the exact opposite of what we’re trying to achieve.
    */
 
   const obsSrc = document.currentScript;
@@ -74,17 +42,17 @@
   // Store state in a global `window.obs` object for reuse later.
   window.obs = window.obs || {};
 
-  // Make Obs.s configurable.
+  // Make Obs.js configurable.
   const obsConfig = (window.obs && window.obs.config) || {};
 
   // Passively listen to changes in network or battery condition without page
   // refresh. Defaults to false.
-  const observeChanges = obsConfig.observeChanges !== false;
+  const observeChanges = obsConfig.observeChanges === true;
 
   // Helper function:
   //
   // Bucket RTT into the nearest upper 25ms. E.g. an RTT of 108ms would be put
-  // into the 125ms bucket. Think of 125ms as being 100–125ms.
+  // into the 125ms bucket. Think of 125ms as being 101–125ms.
   const bucketRTT = rtt =>
     Number.isFinite(rtt) ? Math.ceil(rtt / 25) * 25 : null;
 
@@ -100,8 +68,8 @@
   // Helper function:
   //
   // Bucket downlink to 1Mbps steps. This coarsens the reported `downlink` by
-  // a factor of 40. Chromium-based browsers often report up to ~10 Mbps due to
-  // privacy constraints, so don’t expect to see a number greater than 10:
+  // a factor of 40. Chromium-based browsers commonly cap around ~10Mbps for
+  // privacy reasons, so you may not ever see values above ~10.
   // https://caniuse.com/mdn-api_networkinformation_downlink
   const bucketDownlink = d =>
     Number.isFinite(d) ? Math.ceil(d) : null;
@@ -143,11 +111,12 @@
     o.deliveryMode = rich ? 'rich' : (avoid ? 'lite' : 'cautious');
 
     // Assign delivery Stances into convenient booleans,
-    // e.g.: `if(canShowRichMedia) {}`
+    // E.g.: `if(canShowRichMedia) { … }`
     o.canShowRichMedia     = (o.deliveryMode === 'rich');
     o.shouldAvoidRichMedia = (o.deliveryMode === 'lite');
 
-    // Add classes to the `<html>` element for each of our delivery Stances.
+    // Add classes to the `<html>` element for each of our connection-capability
+    // Stances.
     ['strong','moderate','weak'].forEach(t => {
       html.classList.remove(`has-connection-capability-${t}`);
     });
@@ -219,8 +188,8 @@
       html.classList.toggle('has-bandwidth-high', isHigh);
     }
 
-    // Obs.js doesn’t currently do anything with it, but get maximum estimated
-    // `downlink` while we’re here.
+    // Obs.js doesn’t currently do anything with it, but we capture the maximum
+    // estimated `downlink` while we’re here.
     if ('downlinkMax' in connection) {
       window.obs.downlinkMax = connection.downlinkMax;
     }
@@ -234,7 +203,7 @@
   refreshConnectionStatus();
 
   // If configured, listen out for network condition changes and rerun the
-  // function.
+  // function in response.
   if (observeChanges && connection && typeof connection.addEventListener === 'function') {
     connection.addEventListener('change', refreshConnectionStatus);
   }
@@ -274,7 +243,7 @@
     window.obs.batteryCharging = isCharging;
     html.classList.toggle('has-battery-charging', isCharging);
 
-    // Update delivery stance combining capability and preferences.
+    // Update delivery Stance combining capability and preferences.
     recomputeDelivery();
 
   };
@@ -288,7 +257,8 @@
         // Run the battery function immediately.
         refreshBatteryStatus(battery);
 
-        // If configured, listen out for battery changes and rerun the function.
+        // If configured, listen out for battery changes and rerun the function
+        // in response.
         if (observeChanges && typeof battery.addEventListener === 'function') {
           battery.addEventListener('levelchange', () => refreshBatteryStatus(battery));
           battery.addEventListener('chargingchange', () => refreshBatteryStatus(battery));
