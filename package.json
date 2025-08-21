@@ -1,0 +1,14 @@
+{
+  "name": "obsjs-repo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "watch": "chokidar obs.js -c \"npm run build\"",
+    "dev": "npm run watch"
+  },
+  "devDependencies": {
+    "chokidar-cli": "^3.0.0",
+    "terser": "^5.31.0"
+  }
+}
