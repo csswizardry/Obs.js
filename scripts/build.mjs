@@ -22,6 +22,7 @@ if (!result.code) throw new Error('Minify failed for obs.js');
 
 
 // Leading ';' to guard against ASI, tiny banner for provenance
-const banner = '/*! Obs.js | MIT */\n;';
-await writeFile(OUTPUT, banner + result.code, 'utf8');
+const header = '/*! Obs.js | (c) Harry Roberts, csswizardry.com | MIT */\n;';
+const footer = '\n//# sourceURL=obs.inline.js';
+await writeFile(OUTPUT, header + result.code + footer, 'utf8');
 console.log(`[obs] Wrote ${OUTPUT}`);
