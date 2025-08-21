@@ -180,12 +180,18 @@
     if (downlinkBucket != null) {
       window.obs.downlinkBucket = downlinkBucket; // 1‑Mbps
 
-      // Add high or low bandwidth classes to the `<html>` element.
+      // Add low, medium, or high bandwidth classes to the `<html>` element.
+      // low  = ≤5 Mbps, medium = 6–7 Mbps, high = ≥8 Mbps
       // E.g. `<html class="has-bandwidth-high">`
-      const isLow = downlinkBucket <= 5;
-      const isHigh = downlinkBucket >= 8;
-      html.classList.toggle('has-bandwidth-low', isLow);
-      html.classList.toggle('has-bandwidth-high', isHigh);
+      const downlinkCategory =
+        downlinkBucket <= 5 ? 'low' :
+        downlinkBucket >= 8 ? 'high' : 'medium';
+
+      window.obs.downlinkCategory = downlinkCategory;
+
+      ['low', 'medium', 'high']
+        .forEach(b => html.classList.remove(`has-bandwidth-${b}`));
+      html.classList.add(`has-bandwidth-${downlinkCategory}`);
     }
 
     // Obs.js doesn’t currently do anything with it, but we capture the maximum
