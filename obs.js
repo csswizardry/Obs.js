@@ -101,14 +101,27 @@
       : 'moderate';
 
     // Classify resource conservation based on Save-Data and battery level.
-    const conserve = (o.dataSaver === true) || (o.batteryLow === true);
+    // N.B.: ‘critical’ is a subset of ‘low’ and should also be considered.
+    const conserve = (o.dataSaver === true)
+                  || (o.batteryLow === true)
+                  || (o.batteryCritical === true);
     o.conservationPreference = conserve ? 'conserve' : 'neutral';
 
-    // Combined delivery Stance based on connection strength and resource
-    // conservation.
-    const rich  = !conserve && o.connectionCapability === 'strong';
-    const avoid =  conserve || o.connectionCapability === 'weak';
-    o.deliveryMode = rich ? 'rich' : (avoid ? 'lite' : 'cautious');
+    // Delivery mode:
+    // * ‘lite’ if the link is weak OR Data Saver is on OR battery is critical
+    // * ‘cautious’ if battery is low (but not critical)
+    // * ‘rich’ only when strong and not conserving
+    const forcedLite =
+      o.connectionCapability === 'weak' ||
+      o.dataSaver === true ||
+      o.batteryCritical === true;
+
+    const rich = o.connectionCapability === 'strong' && !forcedLite && !conserve;
+    o.deliveryMode = rich
+      ? 'rich'
+      : forcedLite
+      ? 'lite'
+      : 'cautious';
 
     // Assign delivery Stances into convenient booleans,
     // E.g.: `if(canShowRichMedia) { … }`
