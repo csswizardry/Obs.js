@@ -74,6 +74,50 @@
   const bucketDownlink = d =>
     Number.isFinite(d) ? Math.ceil(d) : null;
 
+  // Helper function:
+  // Categorise device memory (GB) into tiers. Again, user agents may cap this
+  // for privacy reasons.
+  const categoriseDeviceMemory = gb =>
+    Number.isFinite(gb)
+      ? (gb <= 1 ? 'very-low' : gb <= 2 ? 'low' : gb <= 4 ? 'medium' : 'high')
+      : null;
+
+  // Helper function:
+  // Categorise logical CPU cores into tiers.
+  const categoriseCpuCores = cores =>
+    Number.isFinite(cores)
+      ? (cores <= 2 ? 'low' : cores <= 5 ? 'medium' : 'high')
+      : null;
+
+  // Combine hardware signals (CPU + memory) into a device-capability Stance.
+  //
+  // Exposes on `window.obs`:
+  //
+  // * ramCategory: ‘very-low’|‘low’|‘medium’|‘high’
+  // * cpuCategory: 'low’|‘medium’|‘high'
+  // * deviceCapability: ‘weak’|‘moderate’|‘strong’
+  const recomputeDeviceCapability = () => {
+    const o = window.obs || {};
+    const mem = o.ramCategory;
+    const cpu = o.cpuCategory;
+
+    let deviceCap = 'moderate';
+    const memWeak   = mem === 'very-low' || mem === 'low';
+    const memStrong = mem === 'high' || mem === 'medium';
+    const cpuWeak   = cpu === 'low';
+    const cpuStrong = cpu === 'high';
+
+    if (memStrong && cpuStrong) deviceCap = 'strong';
+    else if (memWeak || cpuWeak) deviceCap = 'weak';
+
+    o.deviceCapability = deviceCap;
+
+    ['strong','moderate','weak'].forEach(t => {
+      html.classList.remove(`has-device-capability-${t}`);
+    });
+    html.classList.add(`has-device-capability-${deviceCap}`);
+  };
+
   // Combine network capability (RTT + bandwidth) and user/device preferences
   // (Save-Data, low battery) into a delivery ‘Stance’.
   //
@@ -285,4 +329,44 @@
       // Fail silently otherwise.
       .catch(() => { /* no‑op */ });
   }
+
+  // Device Memory (GB) → very-low/low/medium/high
+  //
+  // Exposes on `window.obs`:
+  // * ramBucket: number|null
+  if ('deviceMemory' in navigator) {
+    const memRaw = Number(navigator.deviceMemory);
+    const memGB = Number.isFinite(memRaw) ? memRaw : null;
+    window.obs.ramBucket = memGB;
+
+    const memCat = categoriseDeviceMemory(memGB);
+    if (memCat) {
+      window.obs.ramCategory = memCat;
+      ['very-low','low','medium','high']
+        .forEach(t => html.classList.remove(`has-ram-${t}`));
+      html.classList.add(`has-ram-${memCat}`);
+    }
+  }
+
+  // CPU logical cores → low/medium/high
+  //
+  // Exposes on `window.obs`:
+  // * cpuBucket: number|null
+  if ('hardwareConcurrency' in navigator) {
+    const coresRaw = Number(navigator.hardwareConcurrency);
+    const cores = Number.isFinite(coresRaw) ? coresRaw : null;
+    window.obs.cpuBucket = cores;
+
+    const cpuCat = categoriseCpuCores(cores);
+    if (cpuCat) {
+      window.obs.cpuCategory = cpuCat;
+      ['low','medium','high']
+        .forEach(t => html.classList.remove(`has-cpu-${t}`));
+      html.classList.add(`has-cpu-${cpuCat}`);
+    }
+  }
+
+  // Compute the device-capability stance once the static hardware signals are in.
+  recomputeDeviceCapability();
+
 })();

@@ -8,7 +8,7 @@
 
   <script>
     /*! Obs.js | (c) Harry Roberts, csswizardry.com | MIT */
-    ;(()=>{const e=document.currentScript;if((!e||e.src||e.type&&"module"===e.type.toLowerCase())&&!1===/^(localhost|127\.0\.0\.1|::1)$/.test(location.hostname))return void console.warn("[Obs.js] Skipping: must be an inline, classic <script> in <head>.",e?e.src?"src="+e.src:"type="+e.type:"type=module");const t=document.documentElement,{connection:n}=navigator;window.obs=window.obs||{};const i=!0===(window.obs&&window.obs.config||{}).observeChanges,a=()=>{const e=window.obs||{},n="number"==typeof e.downlinkBucket?e.downlinkBucket:null;e.connectionCapability="low"===e.rttCategory&&null!=n&&n>=8?"strong":"high"===e.rttCategory||null!=n&&n<=5?"weak":"moderate";const i=!0===e.dataSaver||!0===e.batteryLow||!0===e.batteryCritical;e.conservationPreference=i?"conserve":"neutral";const a="weak"===e.connectionCapability||!0===e.dataSaver||!0===e.batteryCritical;e.deliveryMode="strong"!==e.connectionCapability||a||i?a?"lite":"cautious":"rich",e.canShowRichMedia="rich"===e.deliveryMode,e.shouldAvoidRichMedia="lite"===e.deliveryMode,["strong","moderate","weak"].forEach(e=>{t.classList.remove(`has-connection-capability-${e}`)}),t.classList.add(`has-connection-capability-${e.connectionCapability}`),["conserve","neutral"].forEach(e=>{t.classList.remove(`has-conservation-preference-${e}`)}),t.classList.add(`has-conservation-preference-${e.conservationPreference}`),["rich","cautious","lite"].forEach(e=>{t.classList.remove(`has-delivery-mode-${e}`)}),t.classList.add(`has-delivery-mode-${e.deliveryMode}`)},o=()=>{if(!n)return;const{saveData:e,rtt:i,downlink:o}=n;window.obs.dataSaver=!!e,t.classList.toggle("has-data-saver",!!e);const s=(e=>Number.isFinite(e)?25*Math.ceil(e/25):null)(i);null!=s&&(window.obs.rttBucket=s);const c=(e=>Number.isFinite(e)?e<75?"low":e<=275?"medium":"high":null)(i);c&&(window.obs.rttCategory=c,["low","medium","high"].forEach(e=>t.classList.remove(`has-latency-${e}`)),t.classList.add(`has-latency-${c}`));const r=(l=o,Number.isFinite(l)?Math.ceil(l):null);var l;if(null!=r){window.obs.downlinkBucket=r;const e=r<=5?"low":r>=8?"high":"medium";window.obs.downlinkCategory=e,["low","medium","high"].forEach(e=>t.classList.remove(`has-bandwidth-${e}`)),t.classList.add(`has-bandwidth-${e}`)}"downlinkMax"in n&&(window.obs.downlinkMax=n.downlinkMax),a()};o(),i&&n&&"function"==typeof n.addEventListener&&n.addEventListener("change",o);const s=e=>{if(!e)return;const{level:n,charging:i}=e,o=Number.isFinite(n)?n<=.05:null;window.obs.batteryCritical=o;const s=Number.isFinite(n)?n<=.2:null;window.obs.batteryLow=s,["critical","low"].forEach(e=>t.classList.remove(`has-battery-${e}`)),s&&t.classList.add("has-battery-low"),o&&t.classList.add("has-battery-critical");const c=!!i;window.obs.batteryCharging=c,t.classList.toggle("has-battery-charging",c),a()};"getBattery"in navigator&&navigator.getBattery().then(e=>{s(e),i&&"function"==typeof e.addEventListener&&(e.addEventListener("levelchange",()=>s(e)),e.addEventListener("chargingchange",()=>s(e)))}).catch(()=>{})})();
+    ;(()=>{const e=document.currentScript;if((!e||e.src||e.type&&"module"===e.type.toLowerCase())&&!1===/^(localhost|127\.0\.0\.1|::1)$/.test(location.hostname))return void console.warn("[Obs.js] Skipping: must be an inline, classic <script> in <head>.",e?e.src?"src="+e.src:"type="+e.type:"type=module");const i=document.documentElement,{connection:t}=navigator;window.obs=window.obs||{};const a=!0===(window.obs&&window.obs.config||{}).observeChanges,o=()=>{const e=window.obs||{},t="number"==typeof e.downlinkBucket?e.downlinkBucket:null;e.connectionCapability="low"===e.rttCategory&&null!=t&&t>=8?"strong":"high"===e.rttCategory||null!=t&&t<=5?"weak":"moderate";const a=!0===e.dataSaver||!0===e.batteryLow||!0===e.batteryCritical;e.conservationPreference=a?"conserve":"neutral";const o="weak"===e.connectionCapability||!0===e.dataSaver||!0===e.batteryCritical;e.deliveryMode="strong"!==e.connectionCapability||o||a?o?"lite":"cautious":"rich",e.canShowRichMedia="rich"===e.deliveryMode,e.shouldAvoidRichMedia="lite"===e.deliveryMode,["strong","moderate","weak"].forEach(e=>{i.classList.remove(`has-connection-capability-${e}`)}),i.classList.add(`has-connection-capability-${e.connectionCapability}`),["conserve","neutral"].forEach(e=>{i.classList.remove(`has-conservation-preference-${e}`)}),i.classList.add(`has-conservation-preference-${e.conservationPreference}`),["rich","cautious","lite"].forEach(e=>{i.classList.remove(`has-delivery-mode-${e}`)}),i.classList.add(`has-delivery-mode-${e.deliveryMode}`)},n=()=>{if(!t)return;const{saveData:e,rtt:a,downlink:n}=t;window.obs.dataSaver=!!e,i.classList.toggle("has-data-saver",!!e);const s=(e=>Number.isFinite(e)?25*Math.ceil(e/25):null)(a);null!=s&&(window.obs.rttBucket=s);const r=(e=>Number.isFinite(e)?e<75?"low":e<=275?"medium":"high":null)(a);r&&(window.obs.rttCategory=r,["low","medium","high"].forEach(e=>i.classList.remove(`has-latency-${e}`)),i.classList.add(`has-latency-${r}`));const c=(l=n,Number.isFinite(l)?Math.ceil(l):null);var l;if(null!=c){window.obs.downlinkBucket=c;const e=c<=5?"low":c>=8?"high":"medium";window.obs.downlinkCategory=e,["low","medium","high"].forEach(e=>i.classList.remove(`has-bandwidth-${e}`)),i.classList.add(`has-bandwidth-${e}`)}"downlinkMax"in t&&(window.obs.downlinkMax=t.downlinkMax),o()};n(),a&&t&&"function"==typeof t.addEventListener&&t.addEventListener("change",n);const s=e=>{if(!e)return;const{level:t,charging:a}=e,n=Number.isFinite(t)?t<=.05:null;window.obs.batteryCritical=n;const s=Number.isFinite(t)?t<=.2:null;window.obs.batteryLow=s,["critical","low"].forEach(e=>i.classList.remove(`has-battery-${e}`)),s&&i.classList.add("has-battery-low"),n&&i.classList.add("has-battery-critical");const r=!!a;window.obs.batteryCharging=r,i.classList.toggle("has-battery-charging",r),o()};if("getBattery"in navigator&&navigator.getBattery().then(e=>{s(e),a&&"function"==typeof e.addEventListener&&(e.addEventListener("levelchange",()=>s(e)),e.addEventListener("chargingchange",()=>s(e)))}).catch(()=>{}),"deviceMemory"in navigator){const e=Number(navigator.deviceMemory),t=Number.isFinite(e)?e:null;window.obs.ramBucket=t;const a=(r=t,Number.isFinite(r)?r<=1?"very-low":r<=2?"low":r<=4?"medium":"high":null);a&&(window.obs.ramCategory=a,["very-low","low","medium","high"].forEach(e=>i.classList.remove(`has-ram-${e}`)),i.classList.add(`has-ram-${a}`))}var r;if("hardwareConcurrency"in navigator){const e=Number(navigator.hardwareConcurrency),t=Number.isFinite(e)?e:null;window.obs.cpuBucket=t;const a=(e=>Number.isFinite(e)?e<=2?"low":e<=5?"medium":"high":null)(t);a&&(window.obs.cpuCategory=a,["low","medium","high"].forEach(e=>i.classList.remove(`has-cpu-${e}`)),i.classList.add(`has-cpu-${a}`))}(()=>{const e=window.obs||{},t=e.ramCategory,a=e.cpuCategory;let o="moderate";"high"!==t&&"medium"!==t||"high"!==a?("very-low"===t||"low"===t||"low"===a)&&(o="weak"):o="strong",e.deviceCapability=o,["strong","moderate","weak"].forEach(e=>{i.classList.remove(`has-device-capability-${e}`)}),i.classList.add(`has-device-capability-${o}`)})()})();
     //# sourceURL=obs.inline.js
   </script>
 
@@ -136,14 +136,21 @@
         /battery-critical/.test(name) ||
         /latency-high/.test(name) ||
         /bandwidth-low/.test(name) ||
+        /ram-very-low/.test(name) ||
+        /ram-low/.test(name) ||
+        /cpu-low/.test(name) ||
         /connection-capability-weak/.test(name) ||
+        /device-capability-weak/.test(name) ||
         /delivery-mode-lite/.test(name)
       ) return 'c-pill u-bad';
 
       // Yellow (warn)
       if (
         /battery-low/.test(name) ||
-        /has-data-saver/.test(name) ||
+        /data-saver/.test(name) ||
+        /device-capability-moderate/.test(name) ||
+        /ram-medium/.test(name) ||
+        /cpu-medium/.test(name) ||
         /bandwidth-medium/.test(name) ||
         /latency-medium/.test(name) ||
         /conservation-preference-conserve/.test(name) ||
@@ -154,8 +161,11 @@
       // Green (good)
       if (
         /connection-capability-strong/.test(name) ||
+        /device-capability-strong/.test(name) ||
         /delivery-mode-rich/.test(name) ||
         /bandwidth-high/.test(name) ||
+        /ram-high/.test(name) ||
+        /cpu-high/.test(name) ||
         /latency-low/.test(name)
       ) return 'c-pill u-good';
 
