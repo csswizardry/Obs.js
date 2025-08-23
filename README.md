@@ -124,6 +124,8 @@ Copy/paste the following as close to the top of your `<head>` as possible:
 </script>
 ```
 
+Or download the [latest minified version](https://github.com/csswizardry/Obs.js/releases/latest).
+
 ### Listen for Changes
 
 If you have long-lived pages or a single-page app, you can instruct Obs.js to
