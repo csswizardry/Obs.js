@@ -1,3 +1,5 @@
+<img src=./assets/logo.png alt="Obs.js" width=330 height=107>
+
 # Obs.js
 
 Obs.js uses the Navigator and Battery APIs to get contextual information about
