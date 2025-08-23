@@ -34,7 +34,8 @@
 
     h1, h2,
     p,
-    pre {
+    pre,
+    .c-snippet {
       margin-bottom: 1.5rem;
     }
 
@@ -96,7 +97,8 @@
       line-height: 1;
     }
 
-    code, kbd, samp, output, pre {
+    code, kbd, samp, output, pre,
+    .c-snippet{
       font-family: "Operator Mono", ui-monospace, monospace;
     }
 
@@ -110,6 +112,16 @@
     a:active,
     a:focus {
       text-decoration: underline;
+    }
+
+    .c-snippet {
+      display: block;
+      background-color: #002a35;
+      color: #829396;
+      white-space: pre;
+      border-radius: 4px;
+      overflow: scroll;
+      text-transform: none;
     }
 
     .c-pill {
@@ -210,6 +222,24 @@
   in the <code>&lt;h1&gt;</code> above—you’ll just see your
   <code>system-ui</code> font.</small></p>
 
+  <script class=c-snippet>
+    (() => {
+      // Only load Google Fonts if we can show rich media. In browsers that
+      // don’t support the relevant APIs, we just go ahead and show it.
+      //
+      // Attach it to the end of the `body` rather than the `head` so it doesn’t
+      // inadvertently block rendering.
+      if (window.obs?.shouldAvoidRichMedia === true) {
+        return;
+      } else {
+        const gf = document.createElement('link');
+        gf.rel = 'stylesheet';
+        gf.href = 'https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap';
+        document.body.appendChild(gf);
+      }
+    })();
+  </script>
+
   <p>It is built and maintained by <a href=https://csswizardry.com>Harry
     Roberts</a> under the MIT license.</p>
 
@@ -230,24 +260,6 @@
 
   <p><small><strong>Note:</strong> API support varies by browser; Chromium has
   the broadest coverage.</small></p>
-
-  <script>
-    (() => {
-      // Only load Google Fonts if we can show rich media. In browsers that
-      // don’t support the relevant APIs, we just go ahead and show it.
-      //
-      // Attach it to the end of the `body` rather than the `head` so it doesn’t
-      // inadvertently block rendering.
-      if (window.obs?.shouldAvoidRichMedia === true) {
-        return;
-      } else {
-        const gf = document.createElement('link');
-        gf.rel = 'stylesheet';
-        gf.href = 'https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap';
-        document.body.appendChild(gf);
-      }
-    })();
-  </script>
 
   <script>
     // Render helpers
