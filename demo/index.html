@@ -55,6 +55,8 @@
     h1, h2 {
       text-wrap: balance;
       color: var(--brand);
+      font-family: 'Fredoka', system-ui, sans-serif;
+      font-weight: 500;
     }
 
     h1 {
@@ -202,6 +204,12 @@
   lower-resolution media, forgo web fonts, disable auto-playing video… you name
   it.</p>
 
+  <p><small>In fact, if you have critically low battery, data saver mode
+  enabled, or a weak connection, you won’t see the nice rounded
+  <a href="https://fonts.google.com/specimen/Fredoka"><cite>Fredoka</cite></a>
+  in the <code>&lt;h1&gt;</code> above—you’ll just see your
+  <code>system-ui</code> font.</small></p>
+
   <p>It is built and maintained by <a href=https://csswizardry.com>Harry
     Roberts</a> under the MIT license.</p>
 
@@ -222,6 +230,24 @@
 
   <p><small><strong>Note:</strong> API support varies by browser; Chromium has
   the broadest coverage.</small></p>
+
+  <script>
+    (() => {
+      // Only load Google Fonts if we can show rich media. In browsers that
+      // don’t support the relevant APIs, we just go ahead and show it.
+      //
+      // Attach it to the end of the `body` rather than the `head` so it doesn’t
+      // inadvertently block rendering.
+      if (window.obs?.shouldAvoidRichMedia === true) {
+        return;
+      } else {
+        const gf = document.createElement('link');
+        gf.rel = 'stylesheet';
+        gf.href = 'https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap';
+        document.body.appendChild(gf);
+      }
+    })();
+  </script>
 
   <script>
     // Render helpers
