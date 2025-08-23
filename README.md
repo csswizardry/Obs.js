@@ -1,4 +1,4 @@
-<img src=./assets/logo.png alt="Obs.js" width=330 height=107>
+<img src=./demo/assets/logo.png alt="Obs.js" width=330 height=107>
 
 # Obs.js
 
