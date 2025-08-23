@@ -1,4 +1,8 @@
-# Obs.js
+<img src=./demo/assets/logo.png alt="Obs.js" width=330 height=107>
+
+# Obs.js – context‑aware web performance for everyone
+
+_Meet your users where they are_
 
 Obs.js uses the Navigator and Battery APIs to get contextual information about
 your users’ connection strength and battery status.
