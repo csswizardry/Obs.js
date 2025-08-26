@@ -35,7 +35,9 @@
     h1, h2,
     p,
     pre,
-    .c-snippet {
+    .c-snippet,
+    .c-video > video,
+    .c-video >img {
       margin-bottom: 1.5rem;
     }
 
@@ -120,6 +122,12 @@
       text-decoration: underline;
     }
 
+    img, video {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+
     .c-snippet {
       display: block;
       background-color: #002a35;
@@ -129,6 +137,10 @@
       overflow: scroll;
       text-transform: none;
       padding-right: 2.5em;
+    }
+
+    .c-video > video {
+      aspect-ratio: 312 / 202;
     }
 
     .c-pill {
@@ -264,6 +276,36 @@
   <h2><code>window.obs</code></h2>
 
   <pre id=obs aria-live=polite></pre>
+
+  <link rel=preload as=image href=./assets/poster.png>
+
+  <div class=c-video id=jsVideo></div>
+
+  <script class=c-snippet>
+    (() => {
+      // Inject a video if we’re on a good enough connection, otherwise just
+      // inject a screenshot image.
+      const videoWrapper = document.getElementById('jsVideo');
+
+      if (window.obs?.shouldAvoidRichMedia === true) {
+        const img = new Image();
+        img.src = './assets/poster.png';
+        img.alt = '';
+        img.width = '1500';
+        img.height = '966';
+        videoWrapper.appendChild(img);
+      } else {
+        const video = document.createElement('video');
+        video.src = './assets/video.min.mp4';
+        video.poster = './assets/poster.png';
+        video.autoplay = true;
+        video.muted = true;
+        video.setAttribute('controls', '');
+        videoWrapper.appendChild(video);
+      }
+
+    })();
+  </script>
 
   <p><small><strong>Note:</strong> API support varies by browser; Chromium has
   the broadest coverage.</small></p>
