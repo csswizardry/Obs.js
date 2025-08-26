@@ -288,20 +288,31 @@
       const videoWrapper = document.getElementById('jsVideo');
 
       if (window.obs?.shouldAvoidRichMedia === true) {
+
         const img = new Image();
         img.src = './assets/poster.png';
         img.alt = '';
         img.width = '1500';
         img.height = '966';
         videoWrapper.appendChild(img);
+
       } else {
+
         const video = document.createElement('video');
         video.src = './assets/video.min.mp4';
         video.poster = './assets/poster.png';
         video.autoplay = true;
+        video.loop = true;
         video.muted = true;
         video.controls = true;
+        video.preload = 'auto';
+
+        if (window.obs?.deliveryMode === 'cautious') {
+          video.preload = 'metadata';
+        }
+
         videoWrapper.appendChild(video);
+
       }
 
     })();
