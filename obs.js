@@ -168,8 +168,10 @@
       : 'cautious';
 
     // Assign delivery Stances into convenient booleans,
-    // E.g.: `if(canShowRichMedia) { … }`
-    o.canShowRichMedia     = (o.deliveryMode === 'rich');
+    // e.g.: `if(canShowRichMedia) { … }`
+    // We only trigger this for ‘lite’ and ‘rich’ scenarios: we don’t currently
+    // do anything for ‘cautious.
+    o.canShowRichMedia     = (o.deliveryMode !== 'lite');
     o.shouldAvoidRichMedia = (o.deliveryMode === 'lite');
 
     // Add classes to the `<html>` element for each of our connection-capability
