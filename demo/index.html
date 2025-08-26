@@ -325,6 +325,10 @@
           video.preload = 'metadata';
         }
 
+        if (window.obs?.batteryLow === true) {
+          video.autoplay = false;
+        }
+
         videoWrapper.appendChild(video);
 
       }
