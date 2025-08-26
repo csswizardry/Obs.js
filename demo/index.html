@@ -277,6 +277,16 @@
 
   <pre id=obs aria-live=polite></pre>
 
+  <h2><code>&lt;video&gt;</code> Demo</h2>
+
+  <p>If your connection allows it, you should see a small video below. If not,
+  you will see a static <code>&lt;img&gt;</code>—what can you see?</p>
+
+  <!--
+    - This `preload` is largely pointless as the image will be below the fold.
+    - I’m adding for thoroughness as script-injected images are hidden from the
+    - preload scanner—this reintroduces them.
+    -->
   <link rel=preload as=image href=./assets/poster.png>
 
   <div class=c-video id=jsVideo></div>
