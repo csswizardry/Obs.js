@@ -1,6 +1,6 @@
 <img src=./demo/assets/logo.png alt="Obs.js" width=330 height=107>
 
-# Obs.js – context‑aware web performance for everyone
+# Obs.js: context‑aware web performance for everyone
 
 _Meet your users where they are_
 
