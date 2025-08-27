@@ -124,7 +124,8 @@ Copy/paste the following as close to the top of your `<head>` as possible:
 </script>
 ```
 
-Or download the [latest minified version](https://github.com/csswizardry/Obs.js/releases/latest).
+Or download the [latest minified
+version](https://github.com/csswizardry/Obs.js/releases/latest).
 
 ### Listen for Changes
 
@@ -219,3 +220,34 @@ Obs.js also stores the following properties on the `window.obs` object:
 | `cpuBucket`              | number (cores)                                    | 1-core bucket (integer cores)          | `navigator.hardwareConcurrency`                                           | Prefer `cpuCategory` for segmentation                                                                                                                                         |
 | `cpuCategory`            | `'low'` \| `'medium'` \| `'high'`                 | CPU tier                               | From cores (≤ 2 = low, 3–5 = medium, ≥ 6 = high)                          | Adds `.has-cpu-*` classes                                                                                                                                                     |
 | `deviceCapability`       | `'strong'` \| `'moderate'` \| `'weak'`            | Device capability stance               | From `ramCategory` and `cpuCategory`                                      | **strong** when CPU is **high** **and** RAM is **medium/high**; **weak** when RAM is **very-low/low** **or** CPU is **low**; otherwise **moderate**. Adds matching classes.   |
+
+## Unsupported Browsers
+
+Most of these APIs are only available in Chromium browsers. This means you need
+to decide how to handle notable absentees like iOS yourself: Obs.js does not
+make opinionated decisions for you.
+
+Your choices are:
+
+1. Always ship the rich version to Safari, or;
+2. Always ship the lite version to Safari.
+
+You can write your `if`s and `else`s to accommodate either.
+
+```js
+if (window.obs?.shouldAvoidRichMedia === true) {
+  // Serve lite version to slow supportive browsers.
+} else {
+  // Serve rich version to fast supportive browsers and Safari.
+}
+```
+
+```js
+if (window.obs?.canShowRichMedia === true) {
+  // Serve rich version to fast supportive browsers.
+} else {
+  // Serve lite version to slow supportive browsers and Safari.
+}
+```
+
+The choice is yours.
