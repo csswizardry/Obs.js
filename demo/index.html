@@ -132,6 +132,12 @@
       display: block;
     }
 
+    :target {
+      background-color: #ffc;
+      outline: 10px solid #ffc;
+      scroll-margin-top: 1.5rem;
+    }
+
     .c-snippet {
       display: block;
       background-color: #002a35;
@@ -285,6 +291,9 @@
 
   <pre id=obs aria-live=polite></pre>
 
+  <p><small><strong>Note:</strong> API support varies by browser; Chromium has
+  the broadest coverage.</small></p>
+
   <h2><code>&lt;video&gt;</code> Demo</h2>
 
   <p>If your connection allows it, you should see a small video below. If not,
@@ -339,9 +348,6 @@
 
     })();
   </script>
-
-  <p><small><strong>Note:</strong> API support varies by browser; Chromium has
-  the broadest coverage.</small></p>
 
   <script>
     // Render helpers
@@ -460,6 +466,78 @@
     // Also repaint after a tick to catch initial async battery read
     setTimeout(renderAll, 0);
   </script>
+
+
+
+
+
+  <h2 id=showcase>Showcase</h2>
+
+  <p>These fine folk are using Obs.js:</p>
+
+  <style>
+
+    .c-showcase {
+      margin-left: 0;
+      list-style: none;
+
+      dt {
+        font-weight: bold;
+
+        &::after {
+          content: ":";
+        }
+
+      }
+
+      dd {
+        margin-left: 1.5rem;
+      }
+
+    }
+
+  </style>
+
+  <ul class=c-showcase id=jsShowcase>
+
+    <li>
+      <img src=./assets/showcase/csswizardry.com.png alt="csswizardry.com homepage screenshot" width=1000 height=594 loading=lazy>
+      <dl>
+        <dt>Site</dt>
+        <dd><a href=https://csswizardry.com>csswizardry.com</a></dd>
+        <dt>Usage</dt>
+        <dd>Deliver low-resolution hero images on constrained networks; disable
+        transitions and animations on low battery mode.</dd>
+      </dl>
+    </li>
+
+  </ul>
+
+  <script>
+    (() => {
+      // Shuffle the Showcase so there’s no preferential treatment.
+      const showcase = document.querySelector('#jsShowcase');
+      const items = [...showcase.querySelectorAll('li')];
+
+      // Bail out if there is nothing to shuffle.
+      if (items.length === 1) {
+        return;
+      } else{
+
+        for (let i = items.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [items[i], items[j]] = [items[j], items[i]];
+        }
+
+      }
+
+      showcase.append(...items);
+    })();
+  </script>
+
+
+
+
 
   <script type=module>
     (() => {
