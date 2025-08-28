@@ -127,6 +127,18 @@
       text-decoration: underline;
     }
 
+    a[href^="https://github.com"]::after {
+      content: "";
+      display: inline-block;
+      width: 1ch;
+      height: 1ch;
+      background-size: cover;
+      margin-left: 0.1ch;
+      vertical-align: super;
+      font-style: normal;
+      background-image: url(https://github.githubassets.com/favicons/favicon.svg);
+    }
+
     img, video {
       max-width: 100%;
       height: auto;
