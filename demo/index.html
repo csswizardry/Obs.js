@@ -284,11 +284,13 @@
 
   <script class=c-snippet>
     (() => {
+
       // Only load Google Fonts if we can show rich media. In browsers that
       // don’t support the relevant APIs, we just go ahead and load it.
       //
       // Attach it to the end of the `body` rather than the `head` so it doesn’t
       // inadvertently block rendering.
+
       if (window.obs?.shouldAvoidRichMedia === true) {
         return;
       } else {
@@ -297,6 +299,16 @@
         gf.href = 'https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap';
         document.body.appendChild(gf);
       }
+
+      // Fun fact: because this `script` is a classic, inline, synchronous
+      // `<script>`, ‘the end of the `body`’ in the context of this snippet is
+      // actually immediately after this text you’re reading right now. Open
+      // DevTools and you’ll see the Google Fonts stylesheet isn’t actually at
+      // the `</body>`, but immediately after this code block.
+      //
+      // Another fun fact: this text you’re reading right now is the *exact*
+      // code that the browser just executed. It just has `display: block;`
+      // applied to it. Neat!
     })();
   </script>
 
@@ -339,8 +351,10 @@
 
   <script class=c-snippet>
     (() => {
+
       // Inject a video if we’re on a good enough connection, otherwise just
       // inject a screenshot image.
+
       const videoWrapper = document.getElementById('jsVideo');
 
       if (window.obs?.shouldAvoidRichMedia === true) {
