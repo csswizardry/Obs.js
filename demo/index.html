@@ -127,7 +127,9 @@
       text-decoration: underline;
     }
 
-    a[href^="https://github.com"]::after {
+    a[href^="https://csswizardry.com"]::after,
+    a[href^="https://github.com"]::after,
+    a[href^="https://fonts.google.com/"]::after {
       content: "";
       display: inline-block;
       width: 1ch;
@@ -136,7 +138,18 @@
       margin-left: 0.1ch;
       vertical-align: super;
       font-style: normal;
+    }
+
+    a[href^="https://csswizardry.com"]::after {
+      background-image: url(https://csswizardry.com/icon.png);
+    }
+
+    a[href^="https://github.com"]::after {
       background-image: url(https://github.githubassets.com/favicons/favicon.svg);
+    }
+
+    a[href^="https://fonts.google.com/"]::after {
+      background-image: url(https://www.gstatic.com/images/icons/material/apps/fonts/1x/catalog/v5/favicon.svg);
     }
 
     img, video {
@@ -548,7 +561,7 @@
     })();
   </script>
 
-  <p><small><a href=https://github.com/csswizardry/Obs.js/fork>Submit your site.</a></small></p>
+  <p><a href=https://github.com/csswizardry/Obs.js/fork>Submit your site</a></p>
 
 
 
