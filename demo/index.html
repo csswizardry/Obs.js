@@ -127,6 +127,7 @@
       text-decoration: underline;
     }
 
+    a[href^="#"]::after,
     a[href^="https://csswizardry.com"]::after,
     a[href^="https://github.com"]::after,
     a[href^="https://fonts.google.com/"]::after,
@@ -139,6 +140,10 @@
       margin-left: 0.1ch;
       vertical-align: super;
       font-style: normal;
+    }
+
+    a[href^="#"]::after {
+      background-image: url(./assets/icon.png);
     }
 
     a[href^="https://csswizardry.com"]::after {
@@ -195,6 +200,26 @@
 
     .c-video > video {
       aspect-ratio: 312 / 202;
+    }
+
+    /**
+     * Zoom images on demand on devices that allow it. I need to think of
+     * a better option on mobile.
+     */
+    @media (hover:hover) {
+
+      .c-hero {
+        cursor: zoom-in;
+        transition: 0.2s transform;
+        will-change: transform;
+
+        &:active,
+        &:focus {
+          transform: scale(2);
+        }
+
+      }
+
     }
 
     .c-pill {
@@ -402,6 +427,7 @@
         img.alt = '';
         img.width = '1500';
         img.height = '966';
+        img.classList.add('c-hero');
         videoWrapper.appendChild(img);
 
       } else {
@@ -555,12 +581,12 @@
   <h2 id=analytics>Analytics</h2>
 
   <p>If your <dfn id=dfn:rum><abbr title="Real User Monitoring">RUM</abbr></dfn>
-  or analytics provider accepts the <code>window.obs</code>-style data, you can
-  send it off to them! You don’t <em>need</em> to use Obs.js to adapt or change
-  your site—you can use it as a purely observational tool to learn more about
-  your audience:</p>
+  or analytics provider accepts <code>window.obs</code>-style data, you can send
+  it off to them! You don’t <em>need</em> to use Obs.js to adapt or change your
+  site—you can use it as a purely observational tool to learn more about your
+  audience:</p>
 
-  <img src=./assets/speedcurve.png width=1500 height=887 alt="SpeedCurve
+  <img src=./assets/speedcurve.png class=c-hero width=1500 height=887 alt="SpeedCurve
   dashboard comparing low vs high latency cohorts. Low latency shows faster
   Largest Contentful Paint (1.08s vs 2.9s), with other metrics largely
   unchanged.">
@@ -648,7 +674,7 @@
   <ul class=c-showcase id=jsShowcase>
 
     <li>
-      <img src=./assets/showcase/csswizardry.com.png alt="csswizardry.com homepage screenshot" width=1000 height=594 loading=lazy>
+      <img src=./assets/showcase/csswizardry.com.png class=c-hero alt="csswizardry.com homepage screenshot" width=1000 height=594 loading=lazy>
       <dl>
         <dt>Site</dt>
         <dd><a href=https://csswizardry.com>csswizardry.com</a></dd>
