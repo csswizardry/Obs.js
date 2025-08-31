@@ -129,7 +129,8 @@
 
     a[href^="https://csswizardry.com"]::after,
     a[href^="https://github.com"]::after,
-    a[href^="https://fonts.google.com/"]::after {
+    a[href^="https://fonts.google.com/"]::after,
+    a[href^="https://www.speedcurve.com/"]::after {
       content: "";
       display: inline-block;
       width: 1ch;
@@ -153,6 +154,18 @@
       background-image: url(https://www.gstatic.com/images/icons/material/apps/fonts/1x/catalog/v5/favicon.svg);
     }
 
+    a[href^="https://www.speedcurve.com/"]::after {
+      background-image: url(https://www.speedcurve.com/favicon.ico);
+    }
+
+    abbr {
+      cursor: help;
+    }
+
+    dfn {
+      font-style: normal;;
+    }
+
     img, video {
       max-width: 100%;
       height: auto;
@@ -161,10 +174,14 @@
 
     :target {
       background-color: #ffc;
-      outline: 10px solid #ffc;
       scroll-margin-top: 1.5rem;
     }
 
+    h2:target {
+      outline: 10px solid #ffc;
+    }
+
+    pre,
     .c-snippet {
       display: block;
       background-color: #002a35;
@@ -535,6 +552,71 @@
 
 
 
+  <h2 id=analytics>Analytics</h2>
+
+  <p>If your <dfn id=dfn:rum><abbr title="Real User Monitoring">RUM</abbr></dfn>
+  or analytics provider accepts the <code>window.obs</code>-style data, you can
+  send it off to them! You don’t <em>need</em> to use Obs.js to adapt or change
+  your site—you can use it as a purely observational tool to learn more about
+  your audience:</p>
+
+  <img src=./assets/speedcurve.png width=1500 height=887 alt="SpeedCurve
+  dashboard comparing low vs high latency cohorts. Low latency shows faster
+  Largest Contentful Paint (1.08s vs 2.9s), with other metrics largely
+  unchanged.">
+
+  <p>I send all of my data off to my friends at <a
+    href="https://www.speedcurve.com/">SpeedCurve</a>. With that, I can begin
+  segmenting my <a href=#dfn:rum>RUM</a> data and designing strategies to serve
+  different demographics.</p>
+
+  <p>Here’s the exact snippet I use to send Obs.js data to <a
+    href="https://www.speedcurve.com/">SpeedCurve</a>:</p>
+
+  <script type=module class=c-snippet>
+    /**
+     * All the data previously captured by Obs.js is now sent to SpeedCurve!
+     *
+     * I ❤️ SpeedCurve!
+     */
+
+    (() => {
+      // Bail out if SpeedCurve is not available.
+      if (!window.LUX || typeof window.LUX.addData !== 'function') return;
+
+      const obs = window.obs || Object.create(null);
+
+      // Keys we intend to send. Keep in sync with obs.js
+      const keys = [
+        'canShowRichMedia',
+        'connectionCapability',
+        'conservationPreference',
+        'cpuBucket',
+        'cpuCategory',
+        'dataSaver',
+        'deliveryMode',
+        'deviceCapability',
+        'downlinkBucket',
+        'downlinkCategory',
+        'ramBucket',
+        'ramCategory',
+        'rttBucket',
+        'rttCategory',
+        'shouldAvoidRichMedia'
+      ];
+
+      for (const key of keys) {
+        if (Object.prototype.hasOwnProperty.call(obs, key)) {
+          window.LUX.addData(key, obs[key]);
+        }
+      }
+    })();
+  </script>
+
+
+
+
+
   <h2 id=showcase>Showcase</h2>
 
   <p>These fine folk are using <a
@@ -605,40 +687,6 @@
 
 
 
-
-  <script type=module>
-    (() => {
-      // Bail out if SpeedCurve is not available.
-      if (!window.LUX || typeof window.LUX.addData !== 'function') return;
-
-      const obs = window.obs || Object.create(null);
-
-      // Keys we intend to send. Keep in sync with obs.js
-      const keys = [
-        'canShowRichMedia',
-        'connectionCapability',
-        'conservationPreference',
-        'cpuBucket',
-        'cpuCategory',
-        'dataSaver',
-        'deliveryMode',
-        'deviceCapability',
-        'downlinkBucket',
-        'downlinkCategory',
-        'ramBucket',
-        'ramCategory',
-        'rttBucket',
-        'rttCategory',
-        'shouldAvoidRichMedia'
-      ];
-
-      for (const key of keys) {
-        if (Object.prototype.hasOwnProperty.call(obs, key)) {
-          window.LUX.addData(key, obs[key]);
-        }
-      }
-    })();
-  </script>
 
   <script type=application/ld+json>
     {
