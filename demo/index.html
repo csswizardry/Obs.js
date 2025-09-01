@@ -234,7 +234,7 @@
      * Zoom images on demand on devices that allow it. I need to think of
      * a better option on mobile.
      */
-    @media (hover:hover) {
+    @media (hover: hover) {
 
       .c-hero {
         cursor: zoom-in;
@@ -244,8 +244,13 @@
         &:active,
         &:focus {
           transform: scale(2);
+          cursor: zoom-out;
         }
 
+      }
+
+      html:has(.c-hero:active, .c-hero:focus) {
+        overflow: hidden;
       }
 
     }
