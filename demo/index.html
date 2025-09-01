@@ -41,6 +41,7 @@
     pre,
     ul,
     .c-snippet,
+    .c-hero,
     .c-video > video,
     .c-video >img {
       margin-bottom: 1.5rem;
@@ -130,6 +131,7 @@
     a[href^="#"]::after,
     a[href^="https://csswizardry.com"]::after,
     a[href^="https://github.com"]::after,
+    a[href^="https://developer.mozilla.org"]::after,
     a[href^="https://fonts.google.com/"]::after,
     a[href^="https://www.speedcurve.com/"]::after {
       content: "";
@@ -155,11 +157,15 @@
       background-image: url(https://github.githubassets.com/favicons/favicon.svg);
     }
 
-    a[href^="https://fonts.google.com/"]::after {
+    a[href^="https://developer.mozilla.org"]::after {
+      background-image: url(https://developer.mozilla.org/favicon.svg);
+    }
+
+    a[href^="https://fonts.google.com"]::after {
       background-image: url(https://www.gstatic.com/images/icons/material/apps/fonts/1x/catalog/v5/favicon.svg);
     }
 
-    a[href^="https://www.speedcurve.com/"]::after {
+    a[href^="https://www.speedcurve.com"]::after {
       background-image: url(https://www.speedcurve.com/favicon.ico);
     }
 
@@ -331,12 +337,14 @@
   </hgroup>
 
   <p><a href=https://github.com/csswizardry/Obs.js>Obs.js</a> reads a handful of
-  browser signals (Navigator and Battery APIs) to infer connection strength,
-  battery status, and device capability. It exposes those signals as CSS
-  classes on the <code>&lt;html&gt;</code> element, and as properties on
-  <code>window.obs</code>, so you can adapt delivery accordingly: serve
-  lower-resolution media, forgo web fonts, disable auto-playing video… you name
-  it.</p>
+  browser signals
+  (<a href="https://developer.mozilla.org/en-US/docs/Web/API/Navigator">Navigator</a>
+  and <a href="https://developer.mozilla.org/en-US/docs/Web/API/Battery_Status_API">Battery</a>
+  APIs) to infer connection strength, battery status, and device capability. It
+  exposes those signals as CSS classes on the <code>&lt;html&gt;</code> element,
+  and as properties on <code>window.obs</code>, so you can adapt delivery
+  accordingly: serve lower-resolution media, forgo web fonts, disable
+  auto-playing video… you name it.</p>
 
   <p><small>In fact, if you have critically low battery, data saver mode
   enabled, or a weak connection, you won’t see the nice rounded
