@@ -38,6 +38,7 @@
 
     h1, h2,
     p,
+    details,
     pre,
     ul,
     .c-snippet,
@@ -45,6 +46,16 @@
     .c-video > video,
     .c-video >img {
       margin-bottom: 1.5rem;
+    }
+
+    ol {
+      margin-left: 1.5rem;
+    }
+
+    @media (min-width: 45em) {
+      ol {
+        margin-left: 0;
+      }
     }
 
     html {
@@ -116,7 +127,8 @@
       font-family: "Operator Mono", ui-monospace, monospace;
     }
 
-    a {
+    a, summary {
+      cursor: pointer;
       color: var(--csswizardry);
       text-decoration: none;
       font-weight: 600;
@@ -124,7 +136,10 @@
 
     a:hover,
     a:active,
-    a:focus {
+    a:focus,
+    summary:hover,
+    summary:active,
+    summary:focus {
       text-decoration: underline;
     }
 
@@ -167,6 +182,14 @@
 
     a[href^="https://www.speedcurve.com"]::after {
       background-image: url(https://www.speedcurve.com/favicon.ico);
+    }
+
+    details[open] summary {
+      margin-bottom: 1.5rem;
+    }
+
+    :root details a::after {
+      content: initial;
     }
 
     abbr {
@@ -336,6 +359,17 @@
     <p><em>Meet your users where they are</em></p>
   </hgroup>
 
+  <details>
+    <summary>Contents</summary>
+    <ol>
+      <li><a href=#section:css-api>CSS API</a></li>
+      <li><a href=#section:js-api>JS API</a></li>
+      <li><a href=#section:video-demo><code>&lt;video&gt;</code> Demo</a></li>
+      <li><a href=#section:analytics>Analytics</a></li>
+      <li><a href=#section:showcase>Showcase</a></li>
+    </ol>
+  </details>
+
   <p><a href=https://github.com/csswizardry/Obs.js>Obs.js</a> reads a handful of
   browser signals
   (<a href="https://developer.mozilla.org/en-US/docs/Web/API/Navigator">Navigator</a>
@@ -394,18 +428,18 @@
   <p>Try toggling Data Saver, plugging/unplugging power, or changing networks to
   see updates (where supported).</p>
 
-  <h2><code>html.classList</code></h2>
+  <h2 id=section:css-api><code>html.classList</code></h2>
 
   <p id=classes aria-live=polite></p>
 
-  <h2><code>window.obs</code></h2>
+  <h2 id=section:js-api><code>window.obs</code></h2>
 
   <pre id=obs aria-live=polite></pre>
 
   <p><small><strong>Note:</strong> API support varies by browser; Chromium has
   the broadest coverage.</small></p>
 
-  <h2><code>&lt;video&gt;</code> Demo</h2>
+  <h2 id=section:video-demo><code>&lt;video&gt;</code> Demo</h2>
 
   <p>If your connection allows it, you should see a small video below. If not,
   you will see a static <code>&lt;img&gt;</code>—what can you see?</p>
@@ -585,7 +619,7 @@
 
 
 
-  <h2 id=analytics>Analytics</h2>
+  <h2 id=section:analytics>Analytics</h2>
 
   <p>If your <dfn id=dfn:rum><abbr title="Real User Monitoring">RUM</abbr></dfn>
   or analytics provider accepts <code>window.obs</code>-style data, you can send
@@ -650,7 +684,7 @@
 
 
 
-  <h2 id=showcase>Showcase</h2>
+  <h2 id=section:showcase>Showcase</h2>
 
   <p>These fine folk are using <a
     href=https://github.com/csswizardry/Obs.js>Obs.js</a>:</p>
