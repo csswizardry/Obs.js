@@ -200,6 +200,11 @@
       font-style: normal;;
     }
 
+    q {
+      font-style: italic;
+      quotes: "‘" "’" "“" "”";
+    }
+
     img, video {
       max-width: 100%;
       height: auto;
@@ -369,6 +374,7 @@
     <ol>
       <li><a href=#section:css-api>CSS API</a></li>
       <li><a href=#section:js-api>JS API</a></li>
+      <li><a href=#section:installation>Installation</a></li>
       <li><a href=#section:video-demo><code>&lt;video&gt;</code> Demo</a></li>
       <li><a href=#section:analytics>Analytics</a></li>
       <li><a href=#section:showcase>Showcase</a></li>
@@ -443,6 +449,24 @@
 
   <p><small><strong>Note:</strong> API support varies by browser; Chromium has
   the broadest coverage.</small></p>
+
+  <h2 id=section:installation>Installation</h2>
+
+  <p>Obs.js must be placed early in the <code>&lt;head&gt;</code> as an inline
+  <code>&lt;script&gt;</code>, much like Google Tag Manager. Any attempt to
+  install Obs.js any other way—via a package manager, as an external file—will
+  cause Obs.js to self-terminate.</p>
+
+  <p>In order for Obs.js to provide any value at all, it needs to run before any
+  other HTML, CSS, or JS that might depend on it. Thus, Obs.js must be installed
+  early and synchronously. <q>Early and synchronously</q>, usually means
+  <em>slow</em>, but by pasting Obs.js as an inline <code>&lt;script&gt;</code>,
+  it takes about 1.5ms to run on a <a
+    href="https://csswizardry.com/2025/08/low-and-mid-tier-mobile-for-the-real-world-2025/">real
+  Samsung Galaxy A54</a>.</p>
+
+  <p>Get the snippet on <a
+    href=https://github.com/csswizardry/Obs.js#installation>GitHub</a>.</p>
 
   <h2 id=section:video-demo><code>&lt;video&gt;</code> Demo</h2>
 
