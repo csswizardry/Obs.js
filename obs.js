@@ -18,8 +18,13 @@
    */
 
   const obsSrc = document.currentScript;
+  const obsConfig = (window.obs && window.obs.config) || {};
+  const adaptive = obsConfig.adaptive !== false;
 
-  if (!obsSrc || obsSrc.src || (obsSrc.type && obsSrc.type.toLowerCase() === 'module')) {
+  if (
+    adaptive &&
+    (!obsSrc || obsSrc.src || (obsSrc.type && obsSrc.type.toLowerCase() === 'module'))
+  ) {
     if (/^(localhost|127\.0\.0\.1|::1)$/.test(location.hostname) === false) {
       console.warn(
         '[Obs.js] Skipping: must be an inline, classic <script> in <head>.',
@@ -42,12 +47,24 @@
   // Store state in a global `window.obs` object for reuse later.
   window.obs = window.obs || {};
 
-  // Make Obs.js configurable.
-  const obsConfig = (window.obs && window.obs.config) || {};
-
   // Passively listen to changes in network or battery condition without page
   // refresh. Defaults to false.
   const observeChanges = obsConfig.observeChanges === true;
+
+  const removeClasses = classes => {
+    if (!adaptive) return;
+    classes.forEach(className => html.classList.remove(className));
+  };
+
+  const addClass = className => {
+    if (!adaptive) return;
+    html.classList.add(className);
+  };
+
+  const toggleClass = (className, force) => {
+    if (!adaptive) return;
+    html.classList.toggle(className, force);
+  };
 
   // Helper function:
   //
@@ -112,10 +129,8 @@
 
     o.deviceCapability = deviceCap;
 
-    ['strong','moderate','weak'].forEach(t => {
-      html.classList.remove(`has-device-capability-${t}`);
-    });
-    html.classList.add(`has-device-capability-${deviceCap}`);
+    removeClasses(['strong','moderate','weak'].map(t => `has-device-capability-${t}`));
+    addClass(`has-device-capability-${deviceCap}`);
   };
 
   // Combine network capability (RTT + bandwidth) and user/device preferences
@@ -176,26 +191,20 @@
 
     // Add classes to the `<html>` element for each of our connection-capability
     // Stances.
-    ['strong','moderate','weak'].forEach(t => {
-      html.classList.remove(`has-connection-capability-${t}`);
-    });
-    html.classList.add(`has-connection-capability-${o.connectionCapability}`);
+    removeClasses(['strong','moderate','weak'].map(t => `has-connection-capability-${t}`));
+    addClass(`has-connection-capability-${o.connectionCapability}`);
 
     // Add classes to the `<html>` element for each of our conservation Stances.
     // E.g. `<html class="has-conservation-preference-conserve">`
     // Remove any leftover classes from previous run.
-    ['conserve','neutral'].forEach(t => {
-      html.classList.remove(`has-conservation-preference-${t}`);
-    });
-    html.classList.add(`has-conservation-preference-${o.conservationPreference}`);
+    removeClasses(['conserve','neutral'].map(t => `has-conservation-preference-${t}`));
+    addClass(`has-conservation-preference-${o.conservationPreference}`);
 
     // Add classes to the `<html>` element for each of our delivery Stances.
     // E.g. `<html class="has-delivery-mode-rich">`
     // Remove any leftover classes from previous run.
-    ['rich','cautious','lite'].forEach(t => {
-      html.classList.remove(`has-delivery-mode-${t}`);
-    });
-    html.classList.add(`has-delivery-mode-${o.deliveryMode}`);
+    removeClasses(['rich','cautious','lite'].map(t => `has-delivery-mode-${t}`));
+    addClass(`has-delivery-mode-${o.deliveryMode}`);
   };
 
 
@@ -215,7 +224,7 @@
     // Add a class to the `<html>` element if someone has Data Saver mode
     // enabled.
     window.obs.dataSaver = !!saveData;
-    html.classList.toggle('has-data-saver', !!saveData);
+    toggleClass('has-data-saver', !!saveData);
 
     // Get latency information from `rtt`. Bucket it into our predefined
     // thresholds.
@@ -228,9 +237,8 @@
     if (rttCategory) {
       window.obs.rttCategory = rttCategory;
       // Remove any prior latency class then add the current one.
-      ['low', 'medium', 'high']
-        .forEach(l => html.classList.remove(`has-latency-${l}`));
-      html.classList.add(`has-latency-${rttCategory}`);
+      removeClasses(['low', 'medium', 'high'].map(l => `has-latency-${l}`));
+      addClass(`has-latency-${rttCategory}`);
     }
 
     // Get bandwidth information from `downlink`. Bucket it into our preference
@@ -248,9 +256,8 @@
 
       window.obs.downlinkCategory = downlinkCategory;
 
-      ['low', 'medium', 'high']
-        .forEach(b => html.classList.remove(`has-bandwidth-${b}`));
-      html.classList.add(`has-bandwidth-${downlinkCategory}`);
+      removeClasses(['low', 'medium', 'high'].map(b => `has-bandwidth-${b}`));
+      addClass(`has-bandwidth-${downlinkCategory}`);
     }
 
     // Obs.js doesn’t currently do anything with it, but we capture the maximum
@@ -296,15 +303,15 @@
     // Add battery classes (subset model): at ≤5% we want BOTH low and critical.
     // First remove leftovers, then add any that apply.
     // E.g. `<html class="has-battery-low has-battery-critical">`
-    ['critical','low'].forEach(t => html.classList.remove(`has-battery-${t}`));
-    if (low)      html.classList.add('has-battery-low');
-    if (critical) html.classList.add('has-battery-critical');
+    removeClasses(['critical','low'].map(t => `has-battery-${t}`));
+    if (low)      addClass('has-battery-low');
+    if (critical) addClass('has-battery-critical');
 
     // Add a class to the `<html>` element if the device is currently charging.
     // E.g. `<html class="has-battery-charging">`
     const isCharging = !!charging;
     window.obs.batteryCharging = isCharging;
-    html.classList.toggle('has-battery-charging', isCharging);
+    toggleClass('has-battery-charging', isCharging);
 
     // Update delivery Stance combining capability and preferences.
     recomputeDelivery();
@@ -344,9 +351,8 @@
     const memCat = categoriseDeviceMemory(memGB);
     if (memCat) {
       window.obs.ramCategory = memCat;
-      ['very-low','low','medium','high']
-        .forEach(t => html.classList.remove(`has-ram-${t}`));
-      html.classList.add(`has-ram-${memCat}`);
+      removeClasses(['very-low','low','medium','high'].map(t => `has-ram-${t}`));
+      addClass(`has-ram-${memCat}`);
     }
   }
 
@@ -362,9 +368,8 @@
     const cpuCat = categoriseCpuCores(cores);
     if (cpuCat) {
       window.obs.cpuCategory = cpuCat;
-      ['low','medium','high']
-        .forEach(t => html.classList.remove(`has-cpu-${t}`));
-      html.classList.add(`has-cpu-${cpuCat}`);
+      removeClasses(['low','medium','high'].map(t => `has-cpu-${t}`));
+      addClass(`has-cpu-${cpuCat}`);
     }
   }
 
