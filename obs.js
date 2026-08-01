@@ -17,18 +17,29 @@
    * performance and that’s the exact opposite of what we’re trying to achieve.
    */
 
-  const obsSrc = document.currentScript;
-  const obsConfig = (window.obs && window.obs.config) || {};
+  const obsScript = document.currentScript;
+  const existingObs = window.obs;
+  const obsConfig = (
+    existingObs !== null &&
+    typeof existingObs === 'object' &&
+    existingObs.config
+  ) || {};
   const adaptive = obsConfig.adaptive !== false;
 
   if (
     adaptive &&
-    (!obsSrc || obsSrc.src || (obsSrc.type && obsSrc.type.toLowerCase() === 'module'))
+    (
+      !obsScript ||
+      obsScript.src ||
+      (obsScript.type && obsScript.type.toLowerCase() === 'module')
+    )
   ) {
-    if (/^(localhost|127\.0\.0\.1|::1)$/.test(location.hostname) === false) {
+    if (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) === false) {
       console.warn(
         '[Obs.js] Skipping: must be an inline, classic <script> in <head>.',
-        obsSrc ? (obsSrc.src ? 'src=' + obsSrc.src : 'type=' + obsSrc.type) : 'type=module'
+        obsScript
+          ? (obsScript.src ? 'src=' + obsScript.src : 'type=' + obsScript.type)
+          : 'type=module'
       );
       return;
     }
@@ -38,27 +49,36 @@
 
 
 
-  // Attach Obs.js classes to the `<html>` element.
-  const html = document.documentElement;
+  const obs = existingObs !== null && typeof existingObs === 'object'
+    ? existingObs
+    : {};
+  window.obs = obs;
 
-  // Grab the `connection` property from `navigator`.
-  const { connection } = navigator;
-
-  // Store state in a global `window.obs` object for reuse later.
-  window.obs = window.obs || {};
-
-  // Passively listen to changes in network or battery condition without page
-  // refresh. Defaults to false.
   const observeChanges = obsConfig.observeChanges === true;
+  const RTT_BUCKET_MS = 25;
+  const RTT_LOW_MAX_MS = 75;
+  const RTT_HIGH_MIN_MS = 275;
+  const DOWNLINK_LOW_MAX_MBPS = 5;
+  const DOWNLINK_HIGH_MIN_MBPS = 8;
+  const LATENCY_CATEGORIES = ['low', 'medium', 'high'];
+  const BANDWIDTH_CATEGORIES = ['low', 'medium', 'high'];
+  const RAM_CATEGORIES = ['very-low', 'low', 'medium', 'high'];
+  const CPU_CATEGORIES = ['low', 'medium', 'high'];
+  const DEVICE_CAPABILITIES = ['strong', 'moderate', 'weak'];
+  const CONNECTION_CAPABILITIES = ['strong', 'moderate', 'weak'];
+  const CONSERVATION_PREFERENCES = ['conserve', 'neutral'];
+  const DELIVERY_MODES = ['rich', 'cautious', 'lite'];
 
-  const removeClasses = classes => {
-    if (!adaptive) return;
-    classes.forEach(className => html.classList.remove(className));
-  };
+  let html;
+  let connection;
+  let hasStarted = false;
 
-  const addClass = className => {
+  const setExclusiveClass = (namespace, values, activeValue) => {
     if (!adaptive) return;
-    html.classList.add(className);
+    values.forEach(value => html.classList.remove(`has-${namespace}-${value}`));
+    if (activeValue !== null) {
+      html.classList.add(`has-${namespace}-${activeValue}`);
+    }
   };
 
   const toggleClass = (className, force) => {
@@ -66,314 +86,239 @@
     html.classList.toggle(className, force);
   };
 
-  // Helper function:
-  //
-  // Bucket RTT into the nearest upper 25ms. E.g. an RTT of 108ms would be put
-  // into the 125ms bucket. Think of 125ms as being 101–125ms.
-  const bucketRTT = rtt =>
-    Number.isFinite(rtt) ? Math.ceil(rtt / 25) * 25 : null;
+  const bucketRTT = rtt => {
+    if (!Number.isFinite(rtt)) return null;
+    return Math.ceil(rtt / RTT_BUCKET_MS) * RTT_BUCKET_MS;
+  };
 
-  // Helper function:
-  //
-  // Categorise the observed RTT into CrUX’s High, Medium, Low latency
-  // thresholds: https://developer.chrome.com/blog/crux-2025-02#rtt_tri-bins
-  const categoriseRTT = rtt =>
-    Number.isFinite(rtt)
-      ? (rtt < 75 ? 'low' : rtt <= 275 ? 'medium' : 'high')
-      : null;
+  const categoriseRTT = rtt => {
+    if (!Number.isFinite(rtt)) return null;
+    if (rtt < RTT_LOW_MAX_MS) return 'low';
+    if (rtt < RTT_HIGH_MIN_MS) return 'medium';
+    return 'high';
+  };
 
-  // Helper function:
-  //
-  // Bucket downlink to 1Mbps steps. This coarsens the reported `downlink` by
-  // a factor of 40. Chromium-based browsers commonly cap around ~10Mbps for
-  // privacy reasons, so you may not ever see values above ~10.
-  // https://caniuse.com/mdn-api_networkinformation_downlink
-  const bucketDownlink = d =>
-    Number.isFinite(d) ? Math.ceil(d) : null;
+  const bucketDownlink = downlink => {
+    if (!Number.isFinite(downlink)) return null;
+    return Math.ceil(downlink);
+  };
 
-  // Helper function:
-  // Categorise device memory (GB) into tiers. Again, user agents may cap this
-  // for privacy reasons.
-  const categoriseDeviceMemory = gb =>
-    Number.isFinite(gb)
-      ? (gb <= 1 ? 'very-low' : gb <= 2 ? 'low' : gb <= 4 ? 'medium' : 'high')
-      : null;
+  const categoriseDownlink = downlinkBucket => {
+    if (downlinkBucket === null) return null;
+    if (downlinkBucket <= DOWNLINK_LOW_MAX_MBPS) return 'low';
+    if (downlinkBucket >= DOWNLINK_HIGH_MIN_MBPS) return 'high';
+    return 'medium';
+  };
 
-  // Helper function:
-  // Categorise logical CPU cores into tiers.
-  const categoriseCpuCores = cores =>
-    Number.isFinite(cores)
-      ? (cores <= 2 ? 'low' : cores <= 5 ? 'medium' : 'high')
-      : null;
+  const categoriseDeviceMemory = memoryGB => {
+    if (!Number.isFinite(memoryGB)) return null;
+    if (memoryGB <= 1) return 'very-low';
+    if (memoryGB <= 2) return 'low';
+    if (memoryGB <= 4) return 'medium';
+    return 'high';
+  };
 
-  // Combine hardware signals (CPU + memory) into a device-capability Stance.
-  //
-  // Exposes on `window.obs`:
-  //
-  // * ramCategory: ‘very-low’|‘low’|‘medium’|‘high’
-  // * cpuCategory: 'low’|‘medium’|‘high'
-  // * deviceCapability: ‘weak’|‘moderate’|‘strong’
+  const categoriseCpuCores = cores => {
+    if (!Number.isFinite(cores)) return null;
+    if (cores <= 2) return 'low';
+    if (cores <= 5) return 'medium';
+    return 'high';
+  };
+
   const recomputeDeviceCapability = () => {
-    const o = window.obs || {};
-    const mem = o.ramCategory;
-    const cpu = o.cpuCategory;
+    const memoryCategory = obs.ramCategory;
+    const cpuCategory = obs.cpuCategory;
+    const memoryIsWeak = memoryCategory === 'very-low' || memoryCategory === 'low';
+    const memoryCanBeStrong = memoryCategory === 'medium' || memoryCategory === 'high';
+    const cpuIsWeak = cpuCategory === 'low';
+    const cpuIsStrong = cpuCategory === 'high';
+    let deviceCapability = 'moderate';
 
-    let deviceCap = 'moderate';
-    const memWeak   = mem === 'very-low' || mem === 'low';
-    const memStrong = mem === 'high' || mem === 'medium';
-    const cpuWeak   = cpu === 'low';
-    const cpuStrong = cpu === 'high';
+    if (memoryCanBeStrong && cpuIsStrong) {
+      deviceCapability = 'strong';
+    } else if (memoryIsWeak || cpuIsWeak) {
+      deviceCapability = 'weak';
+    }
 
-    if (memStrong && cpuStrong) deviceCap = 'strong';
-    else if (memWeak || cpuWeak) deviceCap = 'weak';
-
-    o.deviceCapability = deviceCap;
-
-    removeClasses(['strong','moderate','weak'].map(t => `has-device-capability-${t}`));
-    addClass(`has-device-capability-${deviceCap}`);
+    obs.deviceCapability = deviceCapability;
+    setExclusiveClass('device-capability', DEVICE_CAPABILITIES, deviceCapability);
   };
 
-  // Combine network capability (RTT + bandwidth) and user/device preferences
-  // (Save-Data, low battery) into a delivery ‘Stance’.
-  //
-  // Exposes on `window.obs`:
-  //
-  // * connectionCapability: 'strong'|'moderate'|'weak'
-  // * conservationPreference: 'conserve'|'neutral'
-  // * deliveryMode: 'rich'|'cautious'|'lite'
-  // * canShowRichMedia: boolean
-  // * shouldAvoidRichMedia: boolean
   const recomputeDelivery = () => {
-    const o = window.obs || {};
+    const lowRTT = obs.rttCategory === 'low';
+    const highRTT = obs.rttCategory === 'high';
+    const lowBandwidth = obs.downlinkCategory === 'low';
+    const highBandwidth = obs.downlinkCategory === 'high';
 
-    // Classify connection strength based on RTT and downlink.
-    const bw = typeof o.downlinkBucket === 'number' ? o.downlinkBucket : null;
-    const lowRTT  = o.rttCategory === 'low';
-    const highRTT = o.rttCategory === 'high';
-    const highBW  = bw != null && bw >= 8; // 1Mbps buckets
-    const lowBW   = bw != null && bw <= 5;
+    if (lowRTT && highBandwidth) {
+      obs.connectionCapability = 'strong';
+    } else if (highRTT || lowBandwidth) {
+      obs.connectionCapability = 'weak';
+    } else {
+      obs.connectionCapability = 'moderate';
+    }
 
-    o.connectionCapability = (lowRTT && highBW)
-      ? 'strong'
-      : (highRTT || lowBW)
-      ? 'weak'
-      : 'moderate';
+    const shouldConserve = (
+      obs.dataSaver === true ||
+      obs.batteryLow === true ||
+      obs.batteryCritical === true
+    );
+    obs.conservationPreference = shouldConserve ? 'conserve' : 'neutral';
 
-    // Classify resource conservation based on Save-Data and battery level.
-    // N.B.: ‘critical’ is a subset of ‘low’ and should also be considered.
-    const conserve = (o.dataSaver === true)
-                  || (o.batteryLow === true)
-                  || (o.batteryCritical === true);
-    o.conservationPreference = conserve ? 'conserve' : 'neutral';
+    const mustUseLiteMode = (
+      obs.connectionCapability === 'weak' ||
+      obs.dataSaver === true ||
+      obs.batteryCritical === true
+    );
 
-    // Delivery mode:
-    // * ‘lite’ if the link is weak OR Data Saver is on OR battery is critical
-    // * ‘cautious’ if battery is low (but not critical)
-    // * ‘rich’ only when strong and not conserving
-    const forcedLite =
-      o.connectionCapability === 'weak' ||
-      o.dataSaver === true ||
-      o.batteryCritical === true;
+    if (mustUseLiteMode) {
+      obs.deliveryMode = 'lite';
+    } else if (obs.connectionCapability === 'strong' && !shouldConserve) {
+      obs.deliveryMode = 'rich';
+    } else {
+      obs.deliveryMode = 'cautious';
+    }
 
-    const rich = o.connectionCapability === 'strong' && !forcedLite && !conserve;
-    o.deliveryMode = rich
-      ? 'rich'
-      : forcedLite
-      ? 'lite'
-      : 'cautious';
+    obs.canShowRichMedia = obs.deliveryMode !== 'lite';
+    obs.shouldAvoidRichMedia = obs.deliveryMode === 'lite';
 
-    // Assign delivery Stances into convenient booleans,
-    // e.g.: `if(canShowRichMedia) { … }`
-    // We only trigger this for ‘lite’ and ‘rich’ scenarios: we don’t currently
-    // do anything for ‘cautious.
-    o.canShowRichMedia     = (o.deliveryMode !== 'lite');
-    o.shouldAvoidRichMedia = (o.deliveryMode === 'lite');
-
-    // Add classes to the `<html>` element for each of our connection-capability
-    // Stances.
-    removeClasses(['strong','moderate','weak'].map(t => `has-connection-capability-${t}`));
-    addClass(`has-connection-capability-${o.connectionCapability}`);
-
-    // Add classes to the `<html>` element for each of our conservation Stances.
-    // E.g. `<html class="has-conservation-preference-conserve">`
-    // Remove any leftover classes from previous run.
-    removeClasses(['conserve','neutral'].map(t => `has-conservation-preference-${t}`));
-    addClass(`has-conservation-preference-${o.conservationPreference}`);
-
-    // Add classes to the `<html>` element for each of our delivery Stances.
-    // E.g. `<html class="has-delivery-mode-rich">`
-    // Remove any leftover classes from previous run.
-    removeClasses(['rich','cautious','lite'].map(t => `has-delivery-mode-${t}`));
-    addClass(`has-delivery-mode-${o.deliveryMode}`);
+    setExclusiveClass(
+      'connection-capability',
+      CONNECTION_CAPABILITIES,
+      obs.connectionCapability
+    );
+    setExclusiveClass(
+      'conservation-preference',
+      CONSERVATION_PREFERENCES,
+      obs.conservationPreference
+    );
+    setExclusiveClass('delivery-mode', DELIVERY_MODES, obs.deliveryMode);
   };
 
-
-
-
-
-  // Run this function on demand to grab fresh data from the Network Information
-  // API.
   const refreshConnectionStatus = () => {
-
     if (!connection) return;
 
-    // We need to know about Data Saver mode, latency estimates, and bandwidth
-    // estimates.
     const { saveData, rtt, downlink } = connection;
+    obs.dataSaver = !!saveData;
+    toggleClass('has-data-saver', obs.dataSaver);
 
-    // Add a class to the `<html>` element if someone has Data Saver mode
-    // enabled.
-    window.obs.dataSaver = !!saveData;
-    toggleClass('has-data-saver', !!saveData);
-
-    // Get latency information from `rtt`. Bucket it into our predefined
-    // thresholds.
     const rttBucket = bucketRTT(rtt);
-    if (rttBucket != null) window.obs.rttBucket = rttBucket;
-
-    // Add high, medium, low latency classes to the `<html>` element.
-    // E.g. `<html class="has-latency-low">`
     const rttCategory = categoriseRTT(rtt);
-    if (rttCategory) {
-      window.obs.rttCategory = rttCategory;
-      // Remove any prior latency class then add the current one.
-      removeClasses(['low', 'medium', 'high'].map(l => `has-latency-${l}`));
-      addClass(`has-latency-${rttCategory}`);
+    if (rttBucket === null) {
+      delete obs.rttBucket;
+      delete obs.rttCategory;
+    } else {
+      obs.rttBucket = rttBucket;
+      obs.rttCategory = rttCategory;
     }
+    setExclusiveClass('latency', LATENCY_CATEGORIES, rttCategory);
 
-    // Get bandwidth information from `downlink`. Bucket it into our preference
-    // thresholds.
     const downlinkBucket = bucketDownlink(downlink);
-    if (downlinkBucket != null) {
-      window.obs.downlinkBucket = downlinkBucket; // 1‑Mbps
-
-      // Add low, medium, or high bandwidth classes to the `<html>` element.
-      // low  = ≤5 Mbps, medium = 6–7 Mbps, high = ≥8 Mbps
-      // E.g. `<html class="has-bandwidth-high">`
-      const downlinkCategory =
-        downlinkBucket <= 5 ? 'low' :
-        downlinkBucket >= 8 ? 'high' : 'medium';
-
-      window.obs.downlinkCategory = downlinkCategory;
-
-      removeClasses(['low', 'medium', 'high'].map(b => `has-bandwidth-${b}`));
-      addClass(`has-bandwidth-${downlinkCategory}`);
+    const downlinkCategory = categoriseDownlink(downlinkBucket);
+    if (downlinkBucket === null) {
+      delete obs.downlinkBucket;
+      delete obs.downlinkCategory;
+    } else {
+      obs.downlinkBucket = downlinkBucket;
+      obs.downlinkCategory = downlinkCategory;
     }
+    setExclusiveClass('bandwidth', BANDWIDTH_CATEGORIES, downlinkCategory);
 
-    // Obs.js doesn’t currently do anything with it, but we capture the maximum
-    // estimated `downlink` while we’re here.
     if ('downlinkMax' in connection) {
-      window.obs.downlinkMax = connection.downlinkMax;
+      obs.downlinkMax = connection.downlinkMax;
     }
 
-    // Update delivery Stance combining capability and conservation preferences.
     recomputeDelivery();
-
   };
 
-  // Run the connection function as soon as Obs.js loads.
-  refreshConnectionStatus();
-
-  // If configured, listen out for network condition changes and rerun the
-  // function in response.
-  if (observeChanges && connection && typeof connection.addEventListener === 'function') {
-    connection.addEventListener('change', refreshConnectionStatus);
-  }
-
-
-
-
-
-  // Run this function on demand to grab fresh data from the Battery API.
   const refreshBatteryStatus = battery => {
-
     if (!battery) return;
 
-    // Get battery level and charging status.
     const { level, charging } = battery;
-
-    // The API doesn’t report Low Power Mode or similar. Therefore, treat ≤5% as
-    // ‘critical’ and ≤20% as ‘low’.
     const critical = Number.isFinite(level) ? level <= 0.05 : null;
-    window.obs.batteryCritical = critical;
-
     const low = Number.isFinite(level) ? level <= 0.2 : null;
-    window.obs.batteryLow = low;
+    obs.batteryCritical = critical;
+    obs.batteryLow = low;
 
-    // Add battery classes (subset model): at ≤5% we want BOTH low and critical.
-    // First remove leftovers, then add any that apply.
-    // E.g. `<html class="has-battery-low has-battery-critical">`
-    removeClasses(['critical','low'].map(t => `has-battery-${t}`));
-    if (low)      addClass('has-battery-low');
-    if (critical) addClass('has-battery-critical');
+    setExclusiveClass('battery', ['critical', 'low'], null);
+    if (adaptive && low) html.classList.add('has-battery-low');
+    if (adaptive && critical) html.classList.add('has-battery-critical');
 
-    // Add a class to the `<html>` element if the device is currently charging.
-    // E.g. `<html class="has-battery-charging">`
-    const isCharging = !!charging;
-    window.obs.batteryCharging = isCharging;
-    toggleClass('has-battery-charging', isCharging);
-
-    // Update delivery Stance combining capability and preferences.
+    obs.batteryCharging = !!charging;
+    toggleClass('has-battery-charging', obs.batteryCharging);
     recomputeDelivery();
-
   };
 
-  // The Battery API returns a Promise: get to work on it once it resolves.
-  if ('getBattery' in navigator) {
-    navigator.getBattery()
-
-      .then(battery => {
-
-        // Run the battery function immediately.
-        refreshBatteryStatus(battery);
-
-        // If configured, listen out for battery changes and rerun the function
-        // in response.
-        if (observeChanges && typeof battery.addEventListener === 'function') {
-          battery.addEventListener('levelchange', () => refreshBatteryStatus(battery));
-          battery.addEventListener('chargingchange', () => refreshBatteryStatus(battery));
-        }
-      })
-
-      // Fail silently otherwise.
-      .catch(() => { /* no‑op */ });
-  }
-
-  // Device Memory (GB) → very-low/low/medium/high
-  //
-  // Exposes on `window.obs`:
-  // * ramBucket: number|null
-  if ('deviceMemory' in navigator) {
-    const memRaw = Number(navigator.deviceMemory);
-    const memGB = Number.isFinite(memRaw) ? memRaw : null;
-    window.obs.ramBucket = memGB;
-
-    const memCat = categoriseDeviceMemory(memGB);
-    if (memCat) {
-      window.obs.ramCategory = memCat;
-      removeClasses(['very-low','low','medium','high'].map(t => `has-ram-${t}`));
-      addClass(`has-ram-${memCat}`);
+  const readHardwareStatus = () => {
+    if ('deviceMemory' in navigator) {
+      const memory = Number(navigator.deviceMemory);
+      const memoryGB = Number.isFinite(memory) ? memory : null;
+      const memoryCategory = categoriseDeviceMemory(memoryGB);
+      obs.ramBucket = memoryGB;
+      if (memoryCategory === null) delete obs.ramCategory;
+      else obs.ramCategory = memoryCategory;
+      setExclusiveClass('ram', RAM_CATEGORIES, memoryCategory);
     }
-  }
 
-  // CPU logical cores → low/medium/high
-  //
-  // Exposes on `window.obs`:
-  // * cpuBucket: number|null
-  if ('hardwareConcurrency' in navigator) {
-    const coresRaw = Number(navigator.hardwareConcurrency);
-    const cores = Number.isFinite(coresRaw) ? coresRaw : null;
-    window.obs.cpuBucket = cores;
-
-    const cpuCat = categoriseCpuCores(cores);
-    if (cpuCat) {
-      window.obs.cpuCategory = cpuCat;
-      removeClasses(['low','medium','high'].map(t => `has-cpu-${t}`));
-      addClass(`has-cpu-${cpuCat}`);
+    if ('hardwareConcurrency' in navigator) {
+      const hardwareConcurrency = Number(navigator.hardwareConcurrency);
+      const cores = Number.isFinite(hardwareConcurrency) ? hardwareConcurrency : null;
+      const cpuCategory = categoriseCpuCores(cores);
+      obs.cpuBucket = cores;
+      if (cpuCategory === null) delete obs.cpuCategory;
+      else obs.cpuCategory = cpuCategory;
+      setExclusiveClass('cpu', CPU_CATEGORIES, cpuCategory);
     }
-  }
+  };
 
-  // Compute the device-capability stance once the static hardware signals are in.
-  recomputeDeviceCapability();
+  const startObs = () => {
+    if (hasStarted) return;
+    hasStarted = true;
+
+    html = document.documentElement;
+    connection = navigator.connection;
+
+    refreshConnectionStatus();
+    if (
+      observeChanges &&
+      connection &&
+      typeof connection.addEventListener === 'function'
+    ) {
+      connection.addEventListener('change', refreshConnectionStatus);
+    }
+
+    if ('getBattery' in navigator) {
+      navigator.getBattery()
+        .then(battery => {
+          const refreshBattery = () => refreshBatteryStatus(battery);
+          refreshBattery();
+
+          if (observeChanges && typeof battery.addEventListener === 'function') {
+            battery.addEventListener('levelchange', refreshBattery);
+            battery.addEventListener('chargingchange', refreshBattery);
+          }
+        })
+        .catch(() => { /* no-op */ });
+    }
+
+    readHardwareStatus();
+    recomputeDeviceCapability();
+  };
+
+  if (document.prerendering === true) {
+    const startAfterActivation = () => {
+      document.removeEventListener('prerenderingchange', startAfterActivation);
+      document.removeEventListener('visibilitychange', startWhenVisible);
+      startObs();
+    };
+    const startWhenVisible = () => {
+      if (document.visibilityState === 'visible') startAfterActivation();
+    };
+
+    document.addEventListener('prerenderingchange', startAfterActivation, { once: true });
+    document.addEventListener('visibilitychange', startWhenVisible);
+  } else {
+    startObs();
+  }
 
 })();
