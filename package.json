@@ -1,9 +1,42 @@
 {
-  "name": "obsjs-repo",
-  "private": true,
+  "name": "obs.js",
+  "version": "0.3.0",
+  "description": "Context-aware browser signals for adaptive web performance.",
+  "license": "MIT",
+  "author": {
+    "name": "Harry Roberts",
+    "url": "https://csswizardry.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/csswizardry/Obs.js.git"
+  },
+  "homepage": "https://github.com/csswizardry/Obs.js#readme",
+  "bugs": {
+    "url": "https://github.com/csswizardry/Obs.js/issues"
+  },
+  "keywords": [
+    "observability",
+    "performance",
+    "browser",
+    "adaptive-loading",
+    "core-web-vitals"
+  ],
+  "files": [
+    "obs.js",
+    "obs.min.js",
+    "obs-speedcurve.js",
+    "CHANGELOG.md"
+  ],
   "type": "module",
+  "packageManager": "npm@11.19.0",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "node scripts/build.mjs",
+    "package:check": "npm run build && node scripts/verify-package.mjs",
+    "prepack": "npm run build",
     "test": "npm run build && node --test",
     "test:source": "node --test test/obs.test.mjs",
     "watch": "chokidar obs.js -c \"npm run build\"",

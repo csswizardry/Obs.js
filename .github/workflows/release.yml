@@ -1,44 +1,166 @@
-name: release
+name: Release
 
 on:
   push:
-    tags:
-      - '*.*.*'
-      - '*.*.*-*'
+    branches:
+      - main
 
-permissions:
-  contents: write
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  build-and-release:
+  validate:
+    name: Validate release commit
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
+      # actions/checkout v7.0.1
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      # actions/setup-node v7.0.0
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
-          node-version: 20
-          cache: npm
+          node-version: 24
+          package-manager-cache: false
 
-      - name: Install deps
+      - name: Pin npm
+        run: npm install --global npm@11.19.0
+
+      - name: Install dependencies
         run: npm ci
 
-      - name: Build obs.min.js
-        run: npm run build
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
 
-      - name: SHA256 checksum
-        run: shasum -a 256 obs.min.js > SHA256SUMS.txt
+      - name: Test source and generated contracts
+        run: npm test
 
-      - name: Create GitHub Release and upload assets
-        uses: softprops/action-gh-release@v2
+      - name: Verify package contents
+        run: npm run package:check
+
+      - name: Check tracked checkout
+        run: |
+          git diff --check
+          if [ -n "$(git status --short --untracked-files=all)" ]; then
+            git status --short --untracked-files=all
+            exit 1
+          fi
+
+  release_please:
+    name: Prepare or create release
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+      version: ${{ steps.release.outputs.version }}
+      release_url: ${{ steps.release.outputs.html_url }}
+
+    steps:
+      # googleapis/release-please-action v5.0.0
+      - name: Run Release Please
+        id: release
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7
         with:
-          tag_name: ${{ github.ref_name }}
-          name: 'Obs.js ${{ github.ref_name }}'
-          generate_release_notes: true
-          files: |
-            obs.min.js
-            SHA256SUMS.txt
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
 
+  assemble_and_stage:
+    name: Assemble release and stage npm package
+    needs: release_please
+    if: needs.release_please.outputs.release_created == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      # actions/checkout v7.0.1
+      - name: Checkout release tag
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ needs.release_please.outputs.tag_name }}
+
+      # actions/setup-node v7.0.0
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Pin npm
+        run: npm install --global npm@11.19.0
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test release source
+        run: npm test
+
+      - name: Verify package contents
+        run: npm run package:check
+
+      - name: Build exact release package
+        env:
+          RELEASE_TAG: ${{ needs.release_please.outputs.tag_name }}
+          RELEASE_VERSION: ${{ needs.release_please.outputs.version }}
+        run: |
+          PACKAGE_VERSION="$(node -p "require('./package.json').version")"
+          if [ "$PACKAGE_VERSION" != "$RELEASE_VERSION" ] || [ "$PACKAGE_VERSION" != "$RELEASE_TAG" ]; then
+            echo "Version mismatch: package=$PACKAGE_VERSION release=$RELEASE_VERSION tag=$RELEASE_TAG" >&2
+            exit 1
+          fi
+
+          grep -F "/*! Obs.js $PACKAGE_VERSION |" obs.min.js
+          npm pack --ignore-scripts
+          test -f "obs.js-$PACKAGE_VERSION.tgz"
+          sha256sum obs.js obs.min.js obs-speedcurve.js "obs.js-$PACKAGE_VERSION.tgz" > SHA256SUMS.txt
+
+      - name: Upload verified GitHub Release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ needs.release_please.outputs.tag_name }}
+          RELEASE_VERSION: ${{ needs.release_please.outputs.version }}
+        run: |
+          for ASSET in obs.js obs.min.js obs-speedcurve.js "obs.js-$RELEASE_VERSION.tgz" SHA256SUMS.txt; do
+            NAME="$(basename "$ASSET")"
+            if gh release view "$RELEASE_TAG" --json assets --jq '.assets[].name' | grep -Fxq "$NAME"; then
+              DOWNLOAD_DIR="$(mktemp -d)"
+              gh release download "$RELEASE_TAG" --pattern "$NAME" --dir "$DOWNLOAD_DIR"
+              cmp "$ASSET" "$DOWNLOAD_DIR/$NAME"
+            else
+              gh release upload "$RELEASE_TAG" "$ASSET"
+            fi
+          done
+
+      - name: Stage exact package on npm
+        if: vars.NPM_TRUSTED_PUBLISHING_READY == 'true'
+        run: npm stage publish "./obs.js-${{ needs.release_please.outputs.version }}.tgz" --access public
+
+      - name: Summarise release handoff
+        if: always()
+        env:
+          RELEASE_TAG: ${{ needs.release_please.outputs.tag_name }}
+          RELEASE_URL: ${{ needs.release_please.outputs.release_url }}
+          NPM_READY: ${{ vars.NPM_TRUSTED_PUBLISHING_READY }}
+        run: |
+          {
+            echo "## Obs.js $RELEASE_TAG"
+            echo
+            echo "GitHub Release: $RELEASE_URL"
+            echo
+            if [ "$NPM_READY" = "true" ]; then
+              echo "The exact release tarball was submitted to npm staging. Review and approve it with 2FA."
+            else
+              echo "npm staging was skipped because first-package trusted publishing is not ready. Follow the private bootstrap handbook."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

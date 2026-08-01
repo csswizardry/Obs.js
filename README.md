@@ -120,6 +120,29 @@ fully adaptive mode, or analytics-only mode.
 2. **Analytics:** Can be deferred/external; does not add classes to `<html>`, but still
    populates `window.obs` for analytics purposes.
 
+### Package Managers
+
+Obs.js is published once to the npm registry. npm, Yarn, pnpm, and Bun all
+install that same package:
+
+```sh
+npm install obs.js
+yarn add obs.js
+pnpm add obs.js
+bun add obs.js
+```
+
+The installed package contains three browser assets:
+
+- `node_modules/obs.js/obs.js` — readable core source;
+- `node_modules/obs.js/obs.min.js` — generated minified core;
+- `node_modules/obs.js/obs-speedcurve.js` — optional SpeedCurve adapter.
+
+These are distribution files, not a root module API. Copy or inline the asset
+appropriate to your integration. In particular, package installation does not
+change the adaptive requirement below: the core must still execute as a
+classic inline script at the start of `<head>`.
+
 ### Adaptive Installation
 
 If you are using Obs.js for adaptation, it **MUST** be placed in an inline
