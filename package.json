@@ -4,6 +4,8 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",
+    "test": "npm run build && node --test",
+    "test:source": "node --test test/obs.test.mjs",
     "watch": "chokidar obs.js -c \"npm run build\"",
     "dev": "npm run watch"
   },
