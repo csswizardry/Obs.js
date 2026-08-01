@@ -9,7 +9,7 @@
   <script>
     performance.mark('obs_start');
 /*! Obs.js | (c) Harry Roberts, csswizardry.com | MIT */
-;(()=>{const e=document.currentScript,i=window.obs&&window.obs.config||{},n=!1!==i.adaptive;if(n&&(!e||e.src||e.type&&"module"===e.type.toLowerCase())&&!1===/^(localhost|127\.0\.0\.1|::1)$/.test(location.hostname))return void console.warn("[Obs.js] Skipping: must be an inline, classic <script> in <head>.",e?e.src?"src="+e.src:"type="+e.type:"type=module");const t=document.documentElement,{connection:o}=navigator;window.obs=window.obs||{};const a=!0===i.observeChanges,r=e=>{n&&e.forEach(e=>t.classList.remove(e))},c=e=>{n&&t.classList.add(e)},s=(e,i)=>{n&&t.classList.toggle(e,i)};let l=!1;const d=()=>{const e=window.obs||{},i="number"==typeof e.downlinkBucket?e.downlinkBucket:null;e.connectionCapability="low"===e.rttCategory&&null!=i&&i>=8?"strong":"high"===e.rttCategory||null!=i&&i<=5?"weak":"moderate";const n=!0===e.dataSaver||!0===e.batteryLow||!0===e.batteryCritical;e.conservationPreference=n?"conserve":"neutral";const t="weak"===e.connectionCapability||!0===e.dataSaver||!0===e.batteryCritical;e.deliveryMode="strong"!==e.connectionCapability||t||n?t?"lite":"cautious":"rich",e.canShowRichMedia="lite"!==e.deliveryMode,e.shouldAvoidRichMedia="lite"===e.deliveryMode,r(["strong","moderate","weak"].map(e=>`has-connection-capability-${e}`)),c(`has-connection-capability-${e.connectionCapability}`),r(["conserve","neutral"].map(e=>`has-conservation-preference-${e}`)),c(`has-conservation-preference-${e.conservationPreference}`),r(["rich","cautious","lite"].map(e=>`has-delivery-mode-${e}`)),c(`has-delivery-mode-${e.deliveryMode}`)},w=()=>{if(!o)return;const{saveData:e,rtt:i,downlink:n}=o;window.obs.dataSaver=!!e,s("has-data-saver",!!e);const t=(e=>Number.isFinite(e)?25*Math.ceil(e/25):null)(i);null!=t&&(window.obs.rttBucket=t);const a=(e=>Number.isFinite(e)?e<75?"low":e<=275?"medium":"high":null)(i);a&&(window.obs.rttCategory=a,r(["low","medium","high"].map(e=>`has-latency-${e}`)),c(`has-latency-${a}`));const l=(w=n,Number.isFinite(w)?Math.ceil(w):null);var w;if(null!=l){window.obs.downlinkBucket=l;const e=l<=5?"low":l>=8?"high":"medium";window.obs.downlinkCategory=e,r(["low","medium","high"].map(e=>`has-bandwidth-${e}`)),c(`has-bandwidth-${e}`)}"downlinkMax"in o&&(window.obs.downlinkMax=o.downlinkMax),d()},u=e=>{if(!e)return;const{level:i,charging:n}=e,t=Number.isFinite(i)?i<=.05:null;window.obs.batteryCritical=t;const o=Number.isFinite(i)?i<=.2:null;window.obs.batteryLow=o,r(["critical","low"].map(e=>`has-battery-${e}`)),o&&c("has-battery-low"),t&&c("has-battery-critical");const a=!!n;window.obs.batteryCharging=a,s("has-battery-charging",a),d()},h=()=>{if(!l){if(l=!0,w(),a&&o&&"function"==typeof o.addEventListener&&o.addEventListener("change",w),"getBattery"in navigator&&navigator.getBattery().then(e=>{u(e),a&&"function"==typeof e.addEventListener&&(e.addEventListener("levelchange",()=>u(e)),e.addEventListener("chargingchange",()=>u(e)))}).catch(()=>{}),"deviceMemory"in navigator){const i=Number(navigator.deviceMemory),n=Number.isFinite(i)?i:null;window.obs.ramBucket=n;const t=(e=n,Number.isFinite(e)?e<=1?"very-low":e<=2?"low":e<=4?"medium":"high":null);t&&(window.obs.ramCategory=t,r(["very-low","low","medium","high"].map(e=>`has-ram-${e}`)),c(`has-ram-${t}`))}var e;if("hardwareConcurrency"in navigator){const e=Number(navigator.hardwareConcurrency),i=Number.isFinite(e)?e:null;window.obs.cpuBucket=i;const n=(e=>Number.isFinite(e)?e<=2?"low":e<=5?"medium":"high":null)(i);n&&(window.obs.cpuCategory=n,r(["low","medium","high"].map(e=>`has-cpu-${e}`)),c(`has-cpu-${n}`))}(()=>{const e=window.obs||{},i=e.ramCategory,n=e.cpuCategory;let t="moderate";"high"!==i&&"medium"!==i||"high"!==n?("very-low"===i||"low"===i||"low"===n)&&(t="weak"):t="strong",e.deviceCapability=t,r(["strong","moderate","weak"].map(e=>`has-device-capability-${e}`)),c(`has-device-capability-${t}`)})()}};if("prerendering"in document&&!0===document.prerendering){const e=()=>{document.removeEventListener("visibilitychange",i),h()},i=()=>{"visible"===document.visibilityState&&e()};document.addEventListener("prerenderingchange",e,{once:!0}),document.addEventListener("visibilitychange",i)}else h()})();
+;(()=>{const e=document.currentScript,t=window.obs,i=null!==t&&"object"==typeof t&&t.config||{},n=!1!==i.adaptive;if(n&&(!e||e.src||e.type&&"module"===e.type.toLowerCase())&&!1===/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname))return void console.warn("[Obs.js] Skipping: must be an inline, classic <script> in <head>.",e?e.src?"src="+e.src:"type="+e.type:"type=module");const a=null!==t&&"object"==typeof t?t:{};window.obs=a;const r=!0===i.observeChanges,o=["low","medium","high"],l=["low","medium","high"],c=["very-low","low","medium","high"],d=["low","medium","high"],s=["strong","moderate","weak"],u=["strong","moderate","weak"],g=["conserve","neutral"],h=["rich","cautious","lite"];let y,m,v=!1;const w=(e,t,i)=>{n&&(t.forEach(t=>y.classList.remove(`has-${e}-${t}`)),null!==i&&y.classList.add(`has-${e}-${i}`))},b=(e,t)=>{n&&y.classList.toggle(e,t)},p=()=>{a.connectionCapability="low"===a.rttCategory&&"high"===a.downlinkCategory?"strong":"high"===a.rttCategory||"low"===a.downlinkCategory?"weak":"moderate";const e=!0===a.dataSaver||!0===a.batteryLow||!0===a.batteryCritical;a.conservationPreference=e?"conserve":"neutral",a.deliveryMode="weak"===a.connectionCapability||!0===a.dataSaver||!0===a.batteryCritical?"lite":"strong"!==a.connectionCapability||e?"cautious":"rich",a.canShowRichMedia="lite"!==a.deliveryMode,a.shouldAvoidRichMedia="lite"===a.deliveryMode,w("connection-capability",u,a.connectionCapability),w("conservation-preference",g,a.conservationPreference),w("delivery-mode",h,a.deliveryMode)},C=()=>{if(!m)return;const{saveData:e,rtt:t,downlink:i}=m;a.dataSaver=!!e,b("has-data-saver",a.dataSaver);const n=(e=>Number.isFinite(e)?25*Math.ceil(e/25):null)(t),r=(e=>Number.isFinite(e)?e<75?"low":e<275?"medium":"high":null)(t);null===n?(delete a.rttBucket,delete a.rttCategory):(a.rttBucket=n,a.rttCategory=r),w("latency",o,r);const c=(e=>Number.isFinite(e)?Math.ceil(e):null)(i),d=(e=>null===e?null:e<=5?"low":e>=8?"high":"medium")(c);null===c?(delete a.downlinkBucket,delete a.downlinkCategory):(a.downlinkBucket=c,a.downlinkCategory=d),w("bandwidth",l,d),"downlinkMax"in m&&(a.downlinkMax=m.downlinkMax),p()},k=()=>{v||(v=!0,y=document.documentElement,m=navigator.connection,C(),r&&m&&"function"==typeof m.addEventListener&&m.addEventListener("change",C),"getBattery"in navigator&&navigator.getBattery().then(e=>{const t=()=>(e=>{if(!e)return;const{level:t,charging:i}=e,r=Number.isFinite(t)?t<=.05:null,o=Number.isFinite(t)?t<=.2:null;a.batteryCritical=r,a.batteryLow=o,w("battery",["critical","low"],null),n&&o&&y.classList.add("has-battery-low"),n&&r&&y.classList.add("has-battery-critical"),a.batteryCharging=!!i,b("has-battery-charging",a.batteryCharging),p()})(e);t(),r&&"function"==typeof e.addEventListener&&(e.addEventListener("levelchange",t),e.addEventListener("chargingchange",t))}).catch(()=>{}),(()=>{if("deviceMemory"in navigator){const e=Number(navigator.deviceMemory),t=Number.isFinite(e)?e:null,i=(e=>Number.isFinite(e)?e<=1?"very-low":e<=2?"low":e<=4?"medium":"high":null)(t);a.ramBucket=t,null===i?delete a.ramCategory:a.ramCategory=i,w("ram",c,i)}if("hardwareConcurrency"in navigator){const e=Number(navigator.hardwareConcurrency),t=Number.isFinite(e)?e:null,i=(e=>Number.isFinite(e)?e<=2?"low":e<=5?"medium":"high":null)(t);a.cpuBucket=t,null===i?delete a.cpuCategory:a.cpuCategory=i,w("cpu",d,i)}})(),(()=>{const e=a.ramCategory,t=a.cpuCategory;let i="moderate";"medium"!==e&&"high"!==e||"high"!==t?("very-low"===e||"low"===e||"low"===t)&&(i="weak"):i="strong",a.deviceCapability=i,w("device-capability",s,i)})())};if(!0===document.prerendering){const e=()=>{document.removeEventListener("prerenderingchange",e),document.removeEventListener("visibilitychange",t),k()},t=()=>{"visible"===document.visibilityState&&e()};document.addEventListener("prerenderingchange",e,{once:!0}),document.addEventListener("visibilitychange",t)}else k()})();
 //# sourceURL=obs.inline.js
     performance.mark('obs_end');
     const obs_time = performance.measure('obs_time', 'obs_start', 'obs_end');
@@ -669,13 +669,9 @@
   <p>If you only want to use Obs.js for analytics, you can disable adaptive
   mode before Obs.js runs:</p>
 
-  <script class=c-snippet type=null>
-    window.obs = {
-      config: {
-        adaptive: false
-      }
-    };
-  </script>
+  <pre class=c-snippet><code>&lt;script&gt;window.obs = { config: { adaptive: false } };&lt;/script&gt;
+&lt;script src="/path/to/obs.js" defer&gt;&lt;/script&gt;
+&lt;script src="/path/to/obs-speedcurve.js" defer&gt;&lt;/script&gt;</code></pre>
 
   <p>With <code>adaptive: false</code>, Obs.js will still populate
   <code>window.obs</code>, but it won’t add any <code>.has-*</code> classes to
@@ -686,48 +682,9 @@
   <p>That means analytics-only installs can be loaded more flexibly, including
   via an external script.</p>
 
-  <p>Here’s the exact snippet I use to send Obs.js data to <a
-    href="https://www.speedcurve.com/">SpeedCurve</a>:</p>
-
-  <script type=module class=c-snippet>
-    /**
-     * All the data previously captured by Obs.js is now sent to SpeedCurve!
-     *
-     * I ❤️ SpeedCurve!
-     */
-
-    (() => {
-      // Bail out if SpeedCurve is not available.
-      if (!window.LUX || typeof window.LUX.addData !== 'function') return;
-
-      const obs = window.obs || Object.create(null);
-
-      // Keys we intend to send. Keep in sync with Obs.js
-      const keys = [
-        'canShowRichMedia',
-        'connectionCapability',
-        'conservationPreference',
-        'cpuBucket',
-        'cpuCategory',
-        'dataSaver',
-        'deliveryMode',
-        'deviceCapability',
-        'downlinkBucket',
-        'downlinkCategory',
-        'ramBucket',
-        'ramCategory',
-        'rttBucket',
-        'rttCategory',
-        'shouldAvoidRichMedia'
-      ];
-
-      for (const key of keys) {
-        if (Object.prototype.hasOwnProperty.call(obs, key)) {
-          window.LUX.addData(key, obs[key]);
-        }
-      }
-    })();
-  </script>
+  <p>The optional adapter records the Obs.js snapshot once when it runs. Battery
+  properties may be absent because Battery Status resolves asynchronously; the
+  adapter does not wait, poll, or send a later update.</p>
 
 
 
